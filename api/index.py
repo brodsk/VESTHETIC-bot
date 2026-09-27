@@ -612,7 +612,8 @@ def process_callback(query):
     if not user_id:
         return
 
-    u = load_user(user_id)
+    username = query.get("from", {}).get("username")
+    u = load_user(user_id, username)
     lang = u["lang"]
 
     answer_callback(callback_id)
@@ -702,7 +703,7 @@ def process_callback(query):
             if staff_id != user_id:
                 send_message(staff_id, staff_notice)
 
-    save_user(user_id, None, u)
+    save_user(user_id, username, u)
 
 
 @app.get("/api")
