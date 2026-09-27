@@ -183,15 +183,15 @@ def application_create(chat,username,d):
         return None
     a=rows[0]
     msg=(
-        "<b>🆕 New VESTHETIC application</b>\n\n"
-        f"<b>Name:</b> {esc(d.get('name'))}\n"
-        f"<b>Country:</b> {esc(d.get('country'))}\n"
-        f"<b>Languages:</b> {esc(d.get('languages'))}\n"
-        f"<b>Experience:</b> {esc(d.get('experience'))}\n"
-        f"<b>Equipment:</b> {esc(d.get('equipment'))}\n"
-        f"<b>Schedule:</b> {esc(d.get('schedule'))}\n"
-        f"<b>Contact:</b> {esc(d.get('contact'))}\n"
-        f"<b>Source:</b> {esc(d.get('source'))}\n"
+        "<b>🆕 Новая заявка VESTHETIC</b>\n\n"
+        f"<b>Имя:</b> {esc(d.get('name'))}\n"
+        f"<b>Страна:</b> {esc(d.get('country'))}\n"
+        f"<b>Языки:</b> {esc(d.get('languages'))}\n"
+        f"<b>Опыт:</b> {esc(d.get('experience'))}\n"
+        f"<b>Оборудование:</b> {esc(d.get('equipment'))}\n"
+        f"<b>График:</b> {esc(d.get('schedule'))}\n"
+        f"<b>Контакт:</b> {esc(d.get('contact'))}\n"
+        f"<b>Источник:</b> {esc(d.get('source'))}\n"
         f"<b>Заявка:</b> #{esc(a.get('id'))}"
     )
     send(MANAGER_ID,msg,manager_markup(a.get("id")))
