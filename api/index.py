@@ -310,6 +310,12 @@ def send_message(chat_id, text, reply_markup=None):
 def answer_callback(callback_id, text=""):
     return telegram("answerCallbackQuery", {"callback_query_id": callback_id, "text": text})
 
+def edit_message(chat_id, message_id, text, reply_markup=None):
+    data = {"chat_id": chat_id, "message_id": message_id, "text": text, "parse_mode": "HTML"}
+    if reply_markup is not None:
+        data["reply_markup"] = json.dumps(reply_markup, ensure_ascii=False)
+    return telegram("editMessageText", data)
+
 def language_keyboard():
     return {"inline_keyboard": [
         [{"text": "🇷🇺 Русский", "callback_data": "lang_ru"}, {"text": "🇺🇦 Українська", "callback_data": "lang_ua"}],
@@ -339,6 +345,32 @@ def admin_keyboard(app_id):
         [{"text": "🟢 Accept", "callback_data": f"status_accept_{app_id}"}, {"text": "🟡 In progress", "callback_data": f"status_progress_{app_id}"}],
         [{"text": "🔴 Reject", "callback_data": f"status_reject_{app_id}"}]
     ]}
+
+def status_label(status):
+    return {"accept": "🟢 Accepted", "progress": "🟡 In progress", "reject": "🔴 Rejected"}.get(status, "⚪ New")
+
+def status_text(status):
+    return {"accept": "Application accepted.", "progress": "Application is now in progress.", "reject": "Application rejected."}.get(status, "Application status updated.")
+
+def application_text(app_id, data):
+    return (
+        f"<b>VESTHETIC APPLICATION #{app_id}</b>\n"
+        f"👤 Name: {data.get('name','-')}\n"
+        f"🔞 Age: {data.get('age','-')}\n"
+        f"🌍 Country: {data.get('country','-')}\n"
+        f"🗣 Languages: {data.get('languages','-')}\n"
+        f"💼 Experience: {data.get('experience','-')}\n"
+        f"🖥 Equipment: {data.get('equipment','-')}\n"
+        f"🕐 Schedule: {data.get('schedule','-')}\n"
+        f"📱 Telegram: {data.get('contact','-')}\n"
+        f"📣 Source: {data.get('source','-')}\n\n"
+        f"<b>Status:</b> {status_label(data.get('status','new'))}"
+    )
+
+def notify_candidate(app_id, data, status):
+    candidate_id = data.get("_chat_id")
+    if candidate_id:
+        send_message(candidate_id, f"<b>VESTHETIC</b>\n\n{status_text(status)}")
 
 def notify_admins(app_id, data):
     text = (
@@ -379,6 +411,8 @@ def process_message(message):
             app_id = next_application_id
             next_application_id += 1
             applications[app_id] = dict(u["application"])
+            applications[app_id]["_chat_id"] = user_id
+            applications[app_id]["status"] = "new"
             notify_admins(app_id, applications[app_id])
             u["state"] = None
             send_message(user_id, TEXTS[lang]["thanks"], main_keyboard(lang))
@@ -424,11 +458,32 @@ def process_callback(query):
         if len(parts) == 3:
             try:
                 app_id = int(parts[2])
-                if app_id in applications:
-                    applications[app_id]["status"] = parts[1]
-                    answer_callback(callback_id, f"Status: {parts[1]}")
+                status = parts[1]
+                if app_id in applications and status in ("accept", "progress", "reject"):
+                    app = applications[app_id]
+                    app["status"] = status
+                    answer_callback(callback_id, status_text(status))
+
+                    message = query.get("message", {})
+                    message_chat_id = message.get("chat", {}).get("id")
+                    message_id = message.get("message_id")
+                    if message_chat_id and message_id:
+                        edit_message(message_chat_id, message_id, application_text(app_id, app), {"inline_keyboard": []})
+
+                    notify_candidate(app_id, app, status)
+
+                    staff_notice = (
+                        f"<b>Application #{app_id} updated</b>\n"
+                        f"Status: {status_label(status)}\n"
+                        f"Changed by: {user_id}"
+                    )
+                    for staff_id in STAFF_IDS:
+                        if staff_id != user_id:
+                            send_message(staff_id, staff_notice)
             except ValueError:
-                pass
+                answer_callback(callback_id, "Invalid application ID")
+        else:
+            answer_callback(callback_id, "Invalid action")
 
 @app.get("/api")
 async def api_root():
