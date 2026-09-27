@@ -1,2 +1,1 @@
-# No third-party packages required
 fastapi>=0.141.1
