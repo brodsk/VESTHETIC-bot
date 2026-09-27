@@ -6,3 +6,6 @@ dependencies = [
     "fastapi==0.141.1",
     "tzdata==2026.4",
 ]
+
+[tool.vercel]
+entrypoint = "api.index:app"
