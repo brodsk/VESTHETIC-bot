@@ -1,0 +1,16 @@
+name: VESTHETIC follow-ups
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  followups:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run follow-up worker
+        run: |
+          curl --fail --silent --show-error \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://vesthetic-bot.vercel.app/api/cron/followups
