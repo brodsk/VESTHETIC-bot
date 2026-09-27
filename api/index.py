@@ -18,12 +18,110 @@ TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
 
 # ============================================================
-# TEMPORARY STORAGE
+# STORAGE
 # ============================================================
 
 users = {}
-applications = {}
-next_application_id = 1
+
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://xtxqslzublggqhctmjoa.supabase.co").rstrip("/")
+SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+
+def supabase_request(method, path, payload=None, query=None):
+    if not SUPABASE_SERVICE_ROLE_KEY:
+        print("Supabase error: SUPABASE_SERVICE_ROLE_KEY is not configured")
+        return None
+
+    url = f"{SUPABASE_URL}/rest/v1/{path}"
+    if query:
+        url += "?" + urllib.parse.urlencode(query)
+
+    headers = {
+        "apikey": SUPABASE_SERVICE_ROLE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_ROLE_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    if method in ("POST", "PATCH", "PUT"):
+        headers["Prefer"] = "return=representation"
+
+    try:
+        body = None
+        if payload is not None:
+            body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+
+        request = urllib.request.Request(
+            url,
+            data=body,
+            headers=headers,
+            method=method,
+        )
+
+        with urllib.request.urlopen(request, timeout=15) as response:
+            raw = response.read().decode("utf-8")
+            return json.loads(raw) if raw else []
+
+    except Exception as exc:
+        print("Supabase API error:", exc)
+        return None
+
+
+def create_application(chat_id, username, data):
+    payload = {
+        "telegram_chat_id": chat_id,
+        "telegram_username": username,
+        "name": data.get("name"),
+        "age_confirmed": True,
+        "country": data.get("country"),
+        "languages": data.get("languages"),
+        "experience": data.get("experience"),
+        "equipment": data.get("equipment"),
+        "schedule": data.get("schedule"),
+        "contact": data.get("contact"),
+        "source": data.get("source"),
+        "status": "new",
+    }
+
+    rows = supabase_request(
+        "POST",
+        "applications",
+        payload,
+        {"select": "*"},
+    )
+
+    if isinstance(rows, list) and rows:
+        return rows[0]
+
+    return None
+
+
+def get_application(app_id):
+    rows = supabase_request(
+        "GET",
+        "applications",
+        query={
+            "id": f"eq.{app_id}",
+            "select": "*",
+            "limit": "1",
+        },
+    )
+    if isinstance(rows, list) and rows:
+        return rows[0]
+    return None
+
+
+def update_application_status(app_id, status):
+    rows = supabase_request(
+        "PATCH",
+        "applications",
+        {"status": status},
+        {
+            "id": f"eq.{app_id}",
+            "select": "*",
+        },
+    )
+    if isinstance(rows, list) and rows:
+        return rows[0]
+    return None
 
 
 # ============================================================
@@ -356,7 +454,7 @@ def application_text(app_id, data):
     return (
         f"<b>VESTHETIC APPLICATION #{app_id}</b>\n"
         f"👤 Name: {data.get('name','-')}\n"
-        f"🔞 Age: {data.get('age','-')}\n"
+        f"🔞 Age: {'18+ confirmed' if data.get('age_confirmed') else '-'}\n"
         f"🌍 Country: {data.get('country','-')}\n"
         f"🗣 Languages: {data.get('languages','-')}\n"
         f"💼 Experience: {data.get('experience','-')}\n"
@@ -368,7 +466,7 @@ def application_text(app_id, data):
     )
 
 def notify_candidate(app_id, data, status):
-    candidate_id = data.get("_chat_id")
+    candidate_id = data.get("telegram_chat_id")
     if candidate_id:
         send_message(candidate_id, f"<b>VESTHETIC</b>\n\n{status_text(status)}")
 
@@ -385,49 +483,97 @@ def notify_admins(app_id, data):
         send_message(recipient_id, text, admin_keyboard(app_id))
 
 def process_message(message):
-    global next_application_id
     user_id = message.get("chat", {}).get("id")
     if not user_id:
         return
+
     text = message.get("text", "").strip()
-    u = users.setdefault(user_id, {"lang": "en", "state": None, "application": {}})
+    chat = message.get("chat", {})
+    username = chat.get("username")
+
+    u = users.setdefault(
+        user_id,
+        {"lang": "en", "state": None, "application": {}},
+    )
     lang = u["lang"]
 
     if text.startswith("/start"):
         u["state"] = None
-        send_message(user_id, "Choose your language / Выберите язык:", language_keyboard())
+        u["application"] = {}
+        send_message(
+            user_id,
+            "Choose your language / Выберите язык:",
+            language_keyboard(),
+        )
         return
 
     state = u.get("state")
-    order = ["name", "country", "languages", "experience", "equipment", "schedule", "contact", "source"]
+    order = [
+        "name",
+        "country",
+        "languages",
+        "experience",
+        "equipment",
+        "schedule",
+        "contact",
+        "source",
+    ]
+
     if state and state.startswith("apply_") and state != "apply_age":
         field = state[6:]
         u["application"][field] = text
+
         if field in order and order.index(field) < len(order) - 1:
             nxt = order[order.index(field) + 1]
             u["state"] = "apply_" + nxt
             send_message(user_id, TEXTS[lang][nxt])
+
         elif field == "source":
-            app_id = next_application_id
-            next_application_id += 1
-            applications[app_id] = dict(u["application"])
-            applications[app_id]["_chat_id"] = user_id
-            applications[app_id]["status"] = "new"
-            notify_admins(app_id, applications[app_id])
+            app = create_application(user_id, username, u["application"])
+
+            if app is None:
+                send_message(
+                    user_id,
+                    "Произошла ошибка при сохранении заявки. Пожалуйста, попробуйте ещё раз позже.",
+                    main_keyboard(lang),
+                )
+                u["state"] = None
+                return
+
+            app_id = app["id"]
+            notify_admins(app_id, app)
+
             u["state"] = None
-            send_message(user_id, TEXTS[lang]["thanks"], main_keyboard(lang))
+            u["application"] = {}
+
+            send_message(
+                user_id,
+                TEXTS[lang]["thanks"],
+                main_keyboard(lang),
+            )
         return
 
-    send_message(user_id, TEXTS[lang]["welcome"], main_keyboard(lang))
+    send_message(
+        user_id,
+        TEXTS[lang]["welcome"],
+        main_keyboard(lang),
+    )
+
 
 def process_callback(query):
     user_id = query.get("from", {}).get("id")
     data = query.get("data", "")
     callback_id = query.get("id")
+
     if not user_id:
         return
-    u = users.setdefault(user_id, {"lang": "en", "state": None, "application": {}})
+
+    u = users.setdefault(
+        user_id,
+        {"lang": "en", "state": None, "application": {}},
+    )
     lang = u["lang"]
+
     answer_callback(callback_id)
 
     if data.startswith("lang_"):
@@ -435,55 +581,87 @@ def process_callback(query):
         u["lang"] = lang
         u["state"] = None
         send_message(user_id, TEXTS[lang]["welcome"], main_keyboard(lang))
+
     elif data == "home":
         u["state"] = None
         send_message(user_id, TEXTS[lang]["welcome"], main_keyboard(lang))
+
     elif data == "language":
         send_message(user_id, "Choose language / Выберите язык:", language_keyboard())
+
     elif data in ("about", "terms", "faq", "manager"):
         send_message(user_id, TEXTS[lang][data], back_keyboard(lang))
+
     elif data == "apply":
         u["application"] = {}
         u["state"] = "apply_age"
         send_message(user_id, TEXTS[lang]["apply_start"], age_keyboard(lang))
+
     elif data == "age_yes":
         u["application"]["age"] = "18+ confirmed"
         u["state"] = "apply_name"
         send_message(user_id, TEXTS[lang]["name"])
+
     elif data == "age_no":
         u["state"] = None
+        u["application"] = {}
         send_message(user_id, TEXTS[lang]["age_no"], main_keyboard(lang))
+
     elif data.startswith("status_") and user_id in STAFF_IDS:
         parts = data.split("_")
-        if len(parts) == 3:
-            try:
-                app_id = int(parts[2])
-                status = parts[1]
-                if app_id in applications and status in ("accept", "progress", "reject"):
-                    app = applications[app_id]
-                    app["status"] = status
-                    answer_callback(callback_id, status_text(status))
-
-                    message = query.get("message", {})
-                    message_chat_id = message.get("chat", {}).get("id")
-                    message_id = message.get("message_id")
-                    if message_chat_id and message_id:
-                        edit_message(message_chat_id, message_id, application_text(app_id, app), {"inline_keyboard": []})
-
-                    notify_candidate(app_id, app, status)
-
-                    staff_notice = (
-                        f"<b>Application #{app_id} updated</b>\n"
-                        f"Status: {status_label(status)}\n"
-                        f"Changed by: {user_id}"
-                    )
-                    for staff_id in STAFF_IDS:
-                        if staff_id != user_id:
-                            send_message(staff_id, staff_notice)
-            except ValueError:
-                answer_callback(callback_id, "Invalid application ID")
-        else:
+        if len(parts) != 3:
             answer_callback(callback_id, "Invalid action")
+            return
+
+        try:
+            app_id = int(parts[2])
+        except ValueError:
+            answer_callback(callback_id, "Invalid application ID")
+            return
+
+        status = parts[1]
+        if status not in ("accept", "progress", "reject"):
+            answer_callback(callback_id, "Invalid status")
+            return
+
+        app = get_application(app_id)
+        if app is None:
+            answer_callback(callback_id, "Application not found")
+            return
+
+        updated = update_application_status(app_id, status)
+        if updated is None:
+            answer_callback(callback_id, "Database update failed")
+            return
+
+        app = updated
+        answer_callback(callback_id, status_text(status))
+
+        message = query.get("message", {})
+        message_chat_id = message.get("chat", {}).get("id")
+        message_id = message.get("message_id")
+
+        if message_chat_id and message_id:
+            edit_message(
+                message_chat_id,
+                message_id,
+                application_text(app_id, app),
+                {"inline_keyboard": []},
+            )
+
+        notify_candidate(app_id, app, status)
+
+        staff_notice = (
+            f"<b>Application #{app_id} updated</b>\n"
+            f"Status: {status_label(status)}\n"
+            f"Changed by: {user_id}"
+        )
+
+        for staff_id in STAFF_IDS:
+            if staff_id != user_id:
+                send_message(staff_id, staff_notice)
+
+
 
 @app.get("/api")
 async def api_root():
