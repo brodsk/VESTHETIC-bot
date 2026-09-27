@@ -666,13 +666,26 @@ def dashboard_html(apps):
         username = a.get("telegram_username")
         contact = a.get("contact") or username
         contact_link = f"<a href='https://t.me/{html.escape(str(contact).lstrip('@'))}' target='_blank'>Telegram</a>" if contact and not str(contact).startswith("+") else "-"
+        quick_statuses = {
+            "new": ["progress", "contacted"],
+            "progress": ["contacted", "interview"],
+            "contacted": ["interview"],
+            "interview": ["registration"],
+            "registration": ["active"],
+            "active": [],
+            "reject": [],
+        }.get(status, [])
+        quick_buttons = "".join(
+            f"<form method='post' action='/admin/status'><input type='hidden' name='id' value='{app_id}'><button class='quick-btn' name='status' value='{s}' title='{status_label(s)}'>{'💬' if s == 'contacted' else '🎙' if s == 'interview' else '📝' if s == 'registration' else '🟢' if s == 'active' else '🟡'}</button></form>"
+            for s in quick_statuses
+        )
         rows.append(f"""
 <tr data-status="{safe(status)}" data-country="{safe(a.get('country'))}" data-followup="{follow_up_state(a.get('next_action_at'))}">
 <td><b>#{app_id}</b></td><td>{safe(a.get('name'))}</td><td>{safe(a.get('country'))}</td>
 <td>{safe(a.get('languages'))}</td><td>{safe(a.get('experience'))}</td><td>{safe(a.get('schedule'))}</td>
 <td class="badge">{status_label(status)}</td><td>{contact_link}</td>
 <td><b>{safe(a.get('next_action') or '—')}</b><br>{follow_up_badge(a.get('next_action_at'))}</td>
-<td><a class="link" href="/admin/application/{app_id}">Подробнее</a></td>
+<td><div class='quick-actions'>{quick_buttons}<a class='quick-btn' href='/admin/application/{app_id}#followup' title='Follow-up'>📅</a><a class='link' href='/admin/application/{app_id}'>Подробнее</a></div></td>
 </tr>""")
 
     country_options = "".join(f'<option value="{html.escape(c, quote=True)}">{html.escape(c)}</option>' for c in countries)
@@ -697,6 +710,10 @@ table{{width:100%;border-collapse:collapse;min-width:1250px}}th,td{{padding:11px
 th{{color:#888;font-size:11px;text-transform:uppercase;white-space:nowrap}}
 button,select,input,textarea{{border:0;border-radius:9px;padding:10px 11px;background:#181818;color:#fff;font:inherit}}
 button{{cursor:pointer}}a{{color:#fff}}.link{{text-decoration:none;background:#222;padding:7px 9px;border-radius:8px;display:inline-block}}
+.quick-actions{{display:flex;align-items:center;gap:5px;flex-wrap:wrap}}
+.quick-actions form{{margin:0}}
+.quick-btn{{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;padding:6px;border:1px solid #303030;background:#171717;border-radius:8px;text-decoration:none}}
+.quick-btn:hover{{background:#252525}}
 .badge{{font-weight:700}}.muted{{color:#888}}.toolbar{{display:flex;gap:10px;flex-wrap:wrap;margin:18px auto}}
 .toolbar input{{min-width:280px;flex:1}}.toolbar select{{min-width:170px}}
 .stats{{display:grid;grid-template-columns:repeat(8,minmax(110px,1fr));gap:10px;margin-top:18px;margin-bottom:18px}}
@@ -753,7 +770,9 @@ button{{cursor:pointer}}a{{color:#fff}}.link{{text-decoration:none;background:#2
   #applications td:nth-child(8)::before{{content:"Контакт"}}
   #applications td:nth-child(9)::before{{content:"Следующее действие"}}
   #applications td:nth-child(10)::before{{content:"Карточка"}}
-  #applications .link{{width:100%;text-align:center;padding:9px}}
+  #applications .quick-actions{{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}}
+  #applications .quick-actions .quick-btn{{width:100%;min-height:42px}}
+  #applications .quick-actions .link{{grid-column:1 / -1;width:100%;text-align:center;padding:9px}}
   .analytics table{{min-width:0}}
   .analytics th,.analytics td{{padding:8px}}
 }}
@@ -904,7 +923,7 @@ table{{width:100%;border-collapse:collapse}}th,td{{padding:10px;border-bottom:1p
 
 <div class="card"><h2>Воронка</h2><form class="funnel" method="post" action="/admin/status"><input type="hidden" name="id" value="{app_id}">{buttons}</form></div>
 
-<div class="card"><h2>Следующее действие</h2>
+<div class="card" id="followup"><h2>Следующее действие</h2>
 <form method="post" action="/admin/follow-up" class="followup">
 <input type="hidden" name="id" value="{app_id}">
 <input name="next_action" value="{safe(a.get("next_action") or "")}" placeholder="Написать кандидату / назначить интервью / регистрация..." required>
