@@ -161,6 +161,19 @@ def get_application(app_id):
     return None
 
 
+def get_application_history(app_id):
+    rows = supabase_request(
+        "GET",
+        "application_status_history",
+        query={
+            "application_id": f"eq.{app_id}",
+            "select": "*",
+            "order": "created_at.asc",
+        },
+    )
+    return rows if isinstance(rows, list) else []
+
+
 def update_application_status(app_id, status):
     rows = supabase_request(
         "PATCH",
@@ -768,6 +781,7 @@ def dashboard_html(apps):
           <td>{html.escape(str(app.get("schedule") or "-"))}</td>
           <td>{label}</td>
           <td>
+            <a href="/admin/application/{app_id}" style="display:inline-block;margin-right:8px;color:#fff;text-decoration:none;background:#222;border-radius:8px;padding:7px 9px">Подробнее</a>
             <form method="post" action="/admin/status" style="display:inline">
               <input type="hidden" name="id" value="{app_id}">
               <button name="status" value="accept">🟢</button>
@@ -788,7 +802,7 @@ button{border:0;border-radius:8px;padding:7px 9px;margin-right:4px;cursor:pointe
 </style></head><body>
 <h1>VESTHETIC <span class="muted">CRM</span></h1>
 <p class="muted">Заявки</p><div class="wrap"><table>
-<thead><tr><th>ID</th><th>Имя</th><th>Страна</th><th>Языки</th><th>Опыт</th><th>График</th><th>Статус</th><th>Изменить</th></tr></thead>
+<thead><tr><th>ID</th><th>Имя</th><th>Страна</th><th>Языки</th><th>Опыт</th><th>График</th><th>Статус</th><th>Действия</th></tr></thead>
 <tbody>""" + "".join(rows) + """</tbody></table></div></body></html>"""
 
 
@@ -802,6 +816,96 @@ async def admin_dashboard(credentials: HTTPBasicCredentials = __import__("fastap
         query={"select":"*","order":"created_at.desc","limit":"100"},
     ) or []
     return HTMLResponse(dashboard_html(apps))
+
+
+@app.get("/admin/application/{app_id}", response_class=HTMLResponse)
+async def admin_application_detail(app_id: int, credentials: HTTPBasicCredentials = __import__("fastapi").Depends(security)):
+    if not require_admin(credentials):
+        return HTMLResponse("Unauthorized", status_code=401, headers={"WWW-Authenticate": "Basic"})
+
+    app = get_application(app_id)
+    if app is None:
+        return HTMLResponse("<h1>Заявка не найдена</h1><p><a href='/admin'>← К заявкам</a></p>", status_code=404)
+
+    history = get_application_history(app_id)
+
+    def val(key, fallback="-"):
+        value = app.get(key)
+        return html.escape(str(value if value not in (None, "") else fallback))
+
+    status = status_label(app.get("status", "new"))
+    created_at = val("created_at")
+    updated_at = val("updated_at")
+    username = app.get("telegram_username")
+    telegram_username = f"@{html.escape(str(username))}" if username else "-"
+    age = "18+ подтверждён" if app.get("age_confirmed") else "Не подтверждён"
+
+    history_rows = []
+    for item in history:
+        old_status = status_label(item.get("old_status", "new")) if item.get("old_status") else "—"
+        new_status = status_label(item.get("new_status", "new"))
+        changed_by = item.get("changed_by_telegram_id")
+        changed_by_text = html.escape(str(changed_by)) if changed_by else "Система"
+        created = html.escape(str(item.get("created_at") or "-"))
+        history_rows.append(
+            f"<tr><td>{created}</td><td>{old_status}</td><td>{new_status}</td><td>{changed_by_text}</td></tr>"
+        )
+
+    history_html = "".join(history_rows) or "<tr><td colspan='4' class='muted'>История пока пуста</td></tr>"
+
+    return HTMLResponse(f"""<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Заявка #{app_id} — VESTHETIC CRM</title>
+<style>
+body{{font-family:system-ui;background:#0b0b0b;color:#eee;margin:0;padding:24px;max-width:1100px;margin:auto}}
+h1{{letter-spacing:.04em}}a{{color:#fff}}.muted{{color:#888}}
+.card{{background:#111;border:1px solid #292929;border-radius:14px;padding:20px;margin:18px 0}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}}
+.item{{border-bottom:1px solid #292929;padding:10px 0}}.label{{display:block;color:#888;font-size:12px;text-transform:uppercase;margin-bottom:4px}}
+.badge{{font-weight:700}}table{{width:100%;border-collapse:collapse}}th,td{{padding:11px;border-bottom:1px solid #292929;text-align:left}}
+button{{border:0;border-radius:8px;padding:8px 10px;margin-right:5px;cursor:pointer;background:#222;color:#fff}}
+</style></head><body>
+<p><a href="/admin">← К заявкам</a></p>
+<h1>Заявка #{app_id}</h1>
+
+<div class="card">
+  <div class="grid">
+    <div class="item"><span class="label">Имя / псевдоним</span>{val("name")}</div>
+    <div class="item"><span class="label">Telegram username</span>{telegram_username}</div>
+    <div class="item"><span class="label">Telegram ID</span>{val("telegram_chat_id")}</div>
+    <div class="item"><span class="label">Возраст</span>{age}</div>
+    <div class="item"><span class="label">Страна</span>{val("country")}</div>
+    <div class="item"><span class="label">Языки</span>{val("languages")}</div>
+    <div class="item"><span class="label">Опыт</span>{val("experience")}</div>
+    <div class="item"><span class="label">Оборудование</span>{val("equipment")}</div>
+    <div class="item"><span class="label">График</span>{val("schedule")}</div>
+    <div class="item"><span class="label">Контакт</span>{val("contact")}</div>
+    <div class="item"><span class="label">Источник</span>{val("source")}</div>
+    <div class="item"><span class="label">Создана</span>{created_at}</div>
+    <div class="item"><span class="label">Обновлена</span>{updated_at}</div>
+    <div class="item"><span class="label">Текущий статус</span><span class="badge">{status}</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Изменить статус</h2>
+  <form method="post" action="/admin/status">
+    <input type="hidden" name="id" value="{app_id}">
+    <button name="status" value="accept">🟢 Принять</button>
+    <button name="status" value="progress">🟡 В работу</button>
+    <button name="status" value="reject">🔴 Отклонить</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>История статусов</h2>
+  <div style="overflow:auto"><table>
+    <thead><tr><th>Дата</th><th>Было</th><th>Стало</th><th>Изменил</th></tr></thead>
+    <tbody>{history_html}</tbody>
+  </table></div>
+</div>
+</body></html>""")
+
 
 
 @app.post("/admin/status")
