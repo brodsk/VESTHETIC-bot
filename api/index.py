@@ -21,10 +21,54 @@ TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 # STORAGE
 # ============================================================
 
-users = {}
-
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://xtxqslzublggqhctmjoa.supabase.co").rstrip("/")
 SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+
+def load_user(chat_id, username=None):
+    rows = supabase_request(
+        "GET",
+        "bot_users",
+        query={
+            "telegram_chat_id": f"eq.{chat_id}",
+            "select": "*",
+            "limit": "1",
+        },
+    )
+    if isinstance(rows, list) and rows:
+        row = rows[0]
+        try:
+            draft = row.get("application_draft") or {}
+            if isinstance(draft, str):
+                draft = json.loads(draft)
+        except Exception:
+            draft = {}
+        return {
+            "lang": row.get("language") or "en",
+            "state": row.get("state"),
+            "application": draft if isinstance(draft, dict) else {},
+        }
+
+    user = {"lang": "en", "state": None, "application": {}}
+    save_user(chat_id, username, user)
+    return user
+
+
+def save_user(chat_id, username, user):
+    payload = {
+        "telegram_chat_id": chat_id,
+        "telegram_username": username,
+        "language": user.get("lang", "en"),
+        "state": user.get("state"),
+        "application_draft": user.get("application", {}),
+    }
+    return supabase_request(
+        "POST",
+        "bot_users",
+        payload,
+        {"select": "*"},
+    )
+
+
 
 def supabase_request(method, path, payload=None, query=None):
     if not SUPABASE_SERVICE_ROLE_KEY:
@@ -41,7 +85,9 @@ def supabase_request(method, path, payload=None, query=None):
         "Content-Type": "application/json",
     }
 
-    if method in ("POST", "PATCH", "PUT"):
+    if method == "POST":
+        headers["Prefer"] = "resolution=merge-duplicates,return=representation"
+    elif method in ("PATCH", "PUT"):
         headers["Prefer"] = "return=representation"
 
     try:
@@ -491,15 +537,13 @@ def process_message(message):
     chat = message.get("chat", {})
     username = chat.get("username")
 
-    u = users.setdefault(
-        user_id,
-        {"lang": "en", "state": None, "application": {}},
-    )
+    u = load_user(user_id, username)
     lang = u["lang"]
 
     if text.startswith("/start"):
         u["state"] = None
         u["application"] = {}
+        save_user(user_id, username, u)
         send_message(
             user_id,
             "Choose your language / Выберите язык:",
@@ -568,10 +612,7 @@ def process_callback(query):
     if not user_id:
         return
 
-    u = users.setdefault(
-        user_id,
-        {"lang": "en", "state": None, "application": {}},
-    )
+    u = load_user(user_id)
     lang = u["lang"]
 
     answer_callback(callback_id)
@@ -661,6 +702,7 @@ def process_callback(query):
             if staff_id != user_id:
                 send_message(staff_id, staff_notice)
 
+    save_user(user_id, None, u)
 
 
 @app.get("/api")
