@@ -8,6 +8,7 @@ import urllib.parse
 import json
 import os
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 app = FastAPI()
 security = HTTPBasic()
@@ -23,6 +24,7 @@ MANAGER_ID = 8965656829
 MANAGER_USERNAME = "VESTHETIC_manager"
 STAFF_IDS = list(dict.fromkeys(ADMIN_IDS + [MANAGER_ID]))
 CRM_ACTOR_ID = ADMIN_IDS[0] if ADMIN_IDS else MANAGER_ID
+CRM_TIMEZONE = ZoneInfo("Europe/Bratislava")
 
 TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
@@ -283,9 +285,12 @@ def append_internal_note(app_id, note, actor_id):
 
 
 def update_follow_up(app_id, next_action, next_action_at):
+    parsed_at = parse_follow_up_local(next_action_at)
+    if next_action_at and parsed_at is None:
+        return None
     rows = supabase_request("PATCH", "applications", {
         "next_action": next_action.strip(),
-        "next_action_at": next_action_at.strip() if next_action_at else None,
+        "next_action_at": parsed_at,
     }, {"id": f"eq.{app_id}", "select": "*"})
     return rows[0] if isinstance(rows, list) and rows else None
 
@@ -368,6 +373,93 @@ def status_text(status, lang="ru"):
 
 def safe(value):
     return html.escape(str(value if value not in (None, "") else "-"))
+
+
+def parse_follow_up_local(value):
+    value = (value or "").strip()
+    if not value:
+        return None
+    try:
+        dt = datetime.fromisoformat(value)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=CRM_TIMEZONE)
+        return dt.astimezone(timezone.utc).isoformat()
+    except ValueError:
+        return None
+
+
+def format_follow_up_local(value):
+    if not value:
+        return ""
+    try:
+        dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(CRM_TIMEZONE).strftime("%Y-%m-%dT%H:%M")
+    except ValueError:
+        return str(value)[:16]
+
+
+def follow_up_state(value):
+    if not value:
+        return "none"
+    try:
+        dt = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        local = dt.astimezone(CRM_TIMEZONE)
+        now = datetime.now(timezone.utc).astimezone(CRM_TIMEZONE)
+        if local < now:
+            return "overdue"
+        if local.date() == now.date():
+            return "today"
+        return "planned"
+    except ValueError:
+        return "none"
+
+
+def follow_up_badge(value):
+    state = follow_up_state(value)
+    if state == "overdue":
+        return "<span class='follow overdue'>🔴 Просрочено</span>"
+    if state == "today":
+        return "<span class='follow today'>🟡 Сегодня</span>"
+    if state == "planned":
+        return "<span class='follow planned'>⚪ Запланировано</span>"
+    return "<span class='muted'>—</span>"
+
+
+def timeline_items(app_data, history):
+    items = []
+    notes = str(app_data.get("internal_notes") or "").strip()
+    for raw in notes.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        stamp = None
+        body = line
+        if line.startswith("[") and "]" in line:
+            stamp_text, body = line[1:].split("]", 1)
+            try:
+                stamp = datetime.strptime(stamp_text.strip(), "%Y-%m-%d %H:%M UTC").replace(tzinfo=timezone.utc)
+            except ValueError:
+                stamp = None
+        items.append({"kind": "note", "dt": stamp, "title": "Внутренняя заметка", "body": body.strip(), "actor": ""})
+    for item in history:
+        raw_dt = item.get("created_at")
+        try:
+            dt = datetime.fromisoformat(str(raw_dt).replace("Z", "+00:00")) if raw_dt else None
+        except ValueError:
+            dt = None
+        items.append({
+            "kind": "status",
+            "dt": dt,
+            "title": f"Статус: {status_label(item.get('new_status'))}",
+            "body": f"{status_label(item.get('old_status')) if item.get('old_status') else '—'} → {status_label(item.get('new_status'))}",
+            "actor": str(item.get("changed_by_telegram_id") or "Система"),
+        })
+    items.sort(key=lambda x: x.get("dt") or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
+    return items
 
 
 def application_text(app_id, data):
@@ -539,6 +631,34 @@ def dashboard_html(apps):
         for k, v in sorted(sources.items(), key=lambda x: (-x[1], x[0].lower()))
     ) or "<tr><td colspan='2' class='muted'>Нет данных</td></tr>"
 
+    source_stats = {}
+    for a in apps:
+        source = str(a.get("source") or "Не указан").strip() or "Не указан"
+        if source not in source_stats:
+            source_stats[source] = {key: 0 for key in ["new", "contacted", "interview", "registration", "active", "reject"]}
+        status = a.get("status", "new")
+        if status == "accept":
+            status = "active"
+        if status in source_stats[source]:
+            source_stats[source][status] += 1
+    source_conversion_rows = ""
+    for source, vals in sorted(source_stats.items(), key=lambda x: (-sum(x[1].values()), x[0].lower())):
+        total = sum(vals.values())
+        contacted = vals["contacted"] + vals["interview"] + vals["registration"] + vals["active"]
+        interview = vals["interview"] + vals["registration"] + vals["active"]
+        registered = vals["registration"] + vals["active"]
+        active = vals["active"]
+        pct = lambda n: f"{(n / total * 100):.0f}%" if total else "0%"
+        source_conversion_rows += (
+            f"<tr><td>{html.escape(source)}</td><td>{total}</td><td>{contacted} ({pct(contacted)})</td>"
+            f"<td>{interview} ({pct(interview)})</td><td>{registered} ({pct(registered)})</td><td>{active} ({pct(active)})</td></tr>"
+        )
+    source_conversion_rows = source_conversion_rows or "<tr><td colspan='6' class='muted'>Нет данных</td></tr>"
+
+    followup_counts = {"overdue": 0, "today": 0, "planned": 0, "none": 0}
+    for a in apps:
+        followup_counts[follow_up_state(a.get("next_action_at"))] += 1
+
     rows = []
     for a in apps:
         app_id = a.get("id")
@@ -547,11 +667,11 @@ def dashboard_html(apps):
         contact = a.get("contact") or username
         contact_link = f"<a href='https://t.me/{html.escape(str(contact).lstrip('@'))}' target='_blank'>Telegram</a>" if contact and not str(contact).startswith("+") else "-"
         rows.append(f"""
-<tr data-status="{safe(status)}" data-country="{safe(a.get('country'))}">
+<tr data-status="{safe(status)}" data-country="{safe(a.get('country'))}" data-followup="{follow_up_state(a.get('next_action_at'))}">
 <td><b>#{app_id}</b></td><td>{safe(a.get('name'))}</td><td>{safe(a.get('country'))}</td>
 <td>{safe(a.get('languages'))}</td><td>{safe(a.get('experience'))}</td><td>{safe(a.get('schedule'))}</td>
 <td class="badge">{status_label(status)}</td><td>{contact_link}</td>
-<td>{safe(a.get('next_action') or '—')}</td>
+<td><b>{safe(a.get('next_action') or '—')}</b><br>{follow_up_badge(a.get('next_action_at'))}</td>
 <td><a class="link" href="/admin/application/{app_id}">Подробнее</a></td>
 </tr>""")
 
@@ -560,7 +680,8 @@ def dashboard_html(apps):
         ("Всего", len(apps)), ("⚪ Новые", counts.get("new", 0)), ("🟡 В работе", counts.get("progress", 0)),
         ("💬 Связались", counts.get("contacted", 0)), ("🎙 Интервью", counts.get("interview", 0)),
         ("📝 Регистрация", counts.get("registration", 0)), ("🟢 Активны", counts.get("active", 0) + counts.get("accept", 0)),
-        ("🔴 Отклонены", counts.get("reject", 0)),
+        ("🔴 Отклонены", counts.get("reject", 0)), ("🔴 Просрочены", followup_counts["overdue"]),
+        ("🟡 На сегодня", followup_counts["today"]),
     ]
     stat_html = "".join(f"<div class='stat'><span>{label}</span><b>{value}</b></div>" for label, value in cards)
 
@@ -628,6 +749,7 @@ button{{cursor:pointer}}a{{color:#fff}}.link{{text-decoration:none;background:#2
 <div class="card"><h2>Воронка</h2><p class="muted">Новые → работа → контакт → интервью → регистрация → активна</p>
 <p>Новых: <b>{counts.get("new",0)}</b> · В работе: <b>{counts.get("progress",0)}</b> · Активны: <b>{counts.get("active",0)+counts.get("accept",0)}</b></p></div>
 <div class="card"><h2>Источники</h2><div style="overflow:auto"><table><thead><tr><th>Источник</th><th>Заявки</th></tr></thead><tbody>{source_rows}</tbody></table></div></div>
+<div class="card"><h2>Конверсия по источникам</h2><p class="muted">Доля от всех заявок источника, дошедших до этапа.</p><div style="overflow:auto"><table><thead><tr><th>Источник</th><th>Всего</th><th>Контакт</th><th>Интервью</th><th>Регистрация</th><th>Активна</th></tr></thead><tbody>{source_conversion_rows}</tbody></table></div></div>
 </div>
 <div class="toolbar">
 <input id="search" type="search" placeholder="Поиск по имени, стране, языкам, ID...">
@@ -635,21 +757,23 @@ button{{cursor:pointer}}a{{color:#fff}}.link{{text-decoration:none;background:#2
 <option value="new">Новые</option><option value="progress">В работе</option><option value="contacted">Связались</option>
 <option value="interview">Интервью</option><option value="registration">Регистрация</option><option value="active">Активна</option><option value="reject">Отклонена</option></select>
 <select id="countryFilter"><option value="">Все страны</option>{country_options}</select>
+<select id="followupFilter"><option value="">Все follow-up</option><option value="overdue">🔴 Просрочены</option><option value="today">🟡 На сегодня</option><option value="planned">⚪ Запланированы</option><option value="none">Без follow-up</option></select>
 </div>
 <div class="wrap"><table id="applications"><thead><tr>
 <th>ID</th><th>Имя</th><th>Страна</th><th>Языки</th><th>Опыт</th><th>График</th><th>Статус</th><th>Контакт</th><th>Следующее действие</th><th>Карточка</th>
 </tr></thead><tbody>{''.join(rows)}</tbody></table></div>
 <script>
 function filterRows(){{
-const q=document.getElementById('search').value.toLowerCase().trim(), s=document.getElementById('statusFilter').value, c=document.getElementById('countryFilter').value.toLowerCase();
+const q=document.getElementById('search').value.toLowerCase().trim(), s=document.getElementById('statusFilter').value, c=document.getElementById('countryFilter').value.toLowerCase(), f=document.getElementById('followupFilter').value;
 document.querySelectorAll('#applications tbody tr').forEach(row=>{{
-const okQ=!q||row.innerText.toLowerCase().includes(q), okS=!s||row.dataset.status===s, okC=!c||row.dataset.country.toLowerCase()===c;
-row.style.display=okQ&&okS&&okC?'':'none';
+const okQ=!q||row.innerText.toLowerCase().includes(q), okS=!s||row.dataset.status===s, okC=!c||row.dataset.country.toLowerCase()===c, okF=!f||row.dataset.followup===f;
+row.style.display=okQ&&okS&&okC&&okF?'':'none';
 }});
 }}
 document.getElementById('search').addEventListener('input',filterRows);
 document.getElementById('statusFilter').addEventListener('change',filterRows);
 document.getElementById('countryFilter').addEventListener('change',filterRows);
+document.getElementById('followupFilter').addEventListener('change',filterRows);
 </script></body></html>"""
 
 
@@ -670,6 +794,16 @@ async def admin_application_detail(app_id: int, credentials: HTTPBasicCredential
 
     history = get_application_history(app_id)
     notes = html.escape(str(a.get("internal_notes") or ""))
+    timeline = timeline_items(a, history)
+    timeline_rows = ""
+    for item in timeline:
+        dt = item.get("dt")
+        dt_text = dt.astimezone(CRM_TIMEZONE).strftime("%d.%m.%Y %H:%M") if dt else "—"
+        actor = html.escape(item.get("actor") or "")
+        kind = "📝" if item["kind"] == "note" else "🔄"
+        actor_html = f"<div class='muted'>ID: {actor}</div>" if actor else ""
+        timeline_rows += f"<div class='timeline-item'><div class='timeline-head'><b>{kind} {html.escape(item['title'])}</b><span class='muted'>{dt_text}</span></div><div>{html.escape(item['body'])}</div>{actor_html}</div>"
+    timeline_rows = timeline_rows or "<div class='muted'>Пока нет событий.</div>"
     username = a.get("telegram_username")
     telegram_link = f"<a href='https://t.me/{html.escape(str(username))}' target='_blank'>@{html.escape(str(username))}</a>" if username else "-"
     history_rows = ""
@@ -697,6 +831,11 @@ button{{border:0;border-radius:8px;padding:10px 12px;margin:4px;cursor:pointer;b
 textarea{{width:100%;box-sizing:border-box;min-height:130px;border:0;border-radius:10px;padding:12px;background:#181818;color:#fff;font:inherit;resize:vertical}}
 table{{width:100%;border-collapse:collapse}}th,td{{padding:10px;border-bottom:1px solid #292929;text-align:left;vertical-align:top}}
 .notes{{white-space:pre-wrap;background:#0d0d0d;border-radius:10px;padding:12px;margin-bottom:12px;overflow-wrap:anywhere}}
+.timeline{{display:flex;flex-direction:column;gap:8px}}
+.timeline-item{{background:#0d0d0d;border:1px solid #242424;border-radius:10px;padding:12px;overflow-wrap:anywhere}}
+.timeline-head{{display:flex;justify-content:space-between;gap:12px;margin-bottom:7px}}
+.follow{{display:inline-block;font-size:11px;padding:2px 7px;border-radius:999px;background:#1a1a1a;margin-top:4px}}
+.overdue{{color:#ff6b6b}}.today{{color:#ffd166}}.planned{{color:#aaa}}
 .followup{{display:grid;grid-template-columns:2fr 1fr auto;gap:8px}}.followup input{{border:0;border-radius:9px;padding:10px;background:#181818;color:#fff;font:inherit}}
 @media(max-width:700px){{.followup{{grid-template-columns:1fr}}}}
 
@@ -730,7 +869,7 @@ table{{width:100%;border-collapse:collapse}}th,td{{padding:10px;border-bottom:1p
 <div class="item"><span class="label">Обновлена</span>{safe(a.get("updated_at"))}</div>
 <div class="item"><span class="label">Статус</span><b>{status_label(a.get("status","new"))}</b></div>
 <div class="item"><span class="label">Следующее действие</span>{safe(a.get("next_action") or "Не задано")}</div>
-<div class="item"><span class="label">Дата следующего действия</span>{safe(a.get("next_action_at") or "Не задана")}</div>
+<div class="item"><span class="label">Дата следующего действия</span>{safe(format_follow_up_local(a.get("next_action_at")) or "Не задана")}<br>{follow_up_badge(a.get("next_action_at"))}</div>
 </div></div>
 
 <div class="card"><h2>Воронка</h2><form class="funnel" method="post" action="/admin/status"><input type="hidden" name="id" value="{app_id}">{buttons}</form></div>
@@ -739,7 +878,7 @@ table{{width:100%;border-collapse:collapse}}th,td{{padding:10px;border-bottom:1p
 <form method="post" action="/admin/follow-up" class="followup">
 <input type="hidden" name="id" value="{app_id}">
 <input name="next_action" value="{safe(a.get("next_action") or "")}" placeholder="Написать кандидату / назначить интервью / регистрация..." required>
-<input type="datetime-local" name="next_action_at" value="{safe((a.get("next_action_at") or "").replace("Z","").replace("+00:00",""))}">
+<input type="datetime-local" name="next_action_at" value="{safe(format_follow_up_local(a.get("next_action_at")))}">
 <button type="submit">Сохранить follow-up</button>
 </form></div>
 
@@ -748,6 +887,8 @@ table{{width:100%;border-collapse:collapse}}th,td{{padding:10px;border-bottom:1p
 <form method="post" action="/admin/note"><input type="hidden" name="id" value="{app_id}">
 <textarea name="note" placeholder="Например: опыт 2 года, ждём документы, договорились на интервью..."></textarea>
 <br><button type="submit">＋ Добавить заметку</button></form></div>
+
+<div class="card"><h2>Лента кандидата</h2><div class="timeline">{timeline_rows}</div></div>
 
 <div class="card"><h2>История статусов</h2><div class="history"><table>
 <thead><tr><th>Дата</th><th>Было</th><th>Стало</th><th>Изменил</th></tr></thead><tbody>{history_rows}</tbody></table></div></div>
