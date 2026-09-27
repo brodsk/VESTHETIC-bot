@@ -7,7 +7,7 @@ import urllib.request
 import urllib.parse
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 
 app = FastAPI()
@@ -25,6 +25,7 @@ MANAGER_USERNAME = "VESTHETIC_manager"
 STAFF_IDS = list(dict.fromkeys(ADMIN_IDS + [MANAGER_ID]))
 CRM_ACTOR_ID = ADMIN_IDS[0] if ADMIN_IDS else MANAGER_ID
 CRM_TIMEZONE = ZoneInfo("Europe/Bratislava")
+CRON_SECRET = os.environ.get("CRON_SECRET", "")
 
 TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
@@ -291,6 +292,7 @@ def update_follow_up(app_id, next_action, next_action_at):
     rows = supabase_request("PATCH", "applications", {
         "next_action": next_action.strip(),
         "next_action_at": parsed_at,
+        "follow_up_notified_at": None,
     }, {"id": f"eq.{app_id}", "select": "*"})
     return rows[0] if isinstance(rows, list) and rows else None
 
@@ -493,6 +495,87 @@ def notify_admins(app_id, data):
         send_message(recipient_id, text, admin_keyboard(app_id))
 
 
+
+def followup_keyboard(app_id):
+    return {"inline_keyboard": [
+        [{"text": "📋 Карточка", "url": f"https://vesthetic-bot.vercel.app/admin/application/{app_id}"}],
+        [{"text": "✅ Выполнено", "callback_data": f"followup_done_{app_id}"},
+         {"text": "⏰ Через 1 час", "callback_data": f"followup_snooze_{app_id}_1h"}],
+        [{"text": "📅 Завтра 09:00", "callback_data": f"followup_snooze_{app_id}_tomorrow"}],
+    ]}
+
+
+def followup_reminder_text(app_data):
+    app_id = app_data.get("id")
+    local_text = "—"
+    raw = app_data.get("next_action_at")
+    try:
+        dt = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        local_text = dt.astimezone(CRM_TIMEZONE).strftime("%d.%m.%Y, %H:%M")
+    except (ValueError, TypeError):
+        pass
+    return (
+        f"<b>🔔 VESTHETIC — Follow-up #{app_id}</b>\n\n"
+        f"👤 Кандидат: {safe(app_data.get('name'))}\n"
+        f"Статус: {status_label(app_data.get('status', 'new'))}\n"
+        f"Действие: {safe(app_data.get('next_action'))}\n"
+        f"⏰ {local_text}"
+    )
+
+
+def run_followup_jobs():
+    now = datetime.now(timezone.utc)
+    rows = supabase_request("GET", "applications", query={
+        "select": "*",
+        "next_action_at": f"lte.{now.isoformat()}",
+        "follow_up_notified_at": "is.null",
+        "order": "next_action_at.asc",
+        "limit": "50",
+    })
+    if not isinstance(rows, list):
+        return {"reminded": 0, "summary": False}
+
+    reminded = 0
+    for app_data in rows:
+        if app_data.get("status") in {"active", "accept", "reject"}:
+            continue
+        text = followup_reminder_text(app_data)
+        sent = False
+        for staff_id in STAFF_IDS:
+            result = send_message(staff_id, text, followup_keyboard(app_data.get("id")))
+            if isinstance(result, dict) and result.get("ok"):
+                sent = True
+        if sent:
+            updated = supabase_request("PATCH", "applications", {
+                "follow_up_notified_at": now.isoformat(),
+            }, {"id": f"eq.{app_data.get('id')}", "select": "id,follow_up_notified_at"})
+            if isinstance(updated, list) and updated:
+                reminded += 1
+
+    local_now = now.astimezone(CRM_TIMEZONE)
+    summary_sent = False
+    if local_now.hour == 9 and local_now.minute == 0:
+        all_apps = get_applications(1000)
+        counts = {"overdue": 0, "today": 0, "planned": 0, "none": 0}
+        for app_data in all_apps:
+            if app_data.get("status") in {"active", "accept", "reject"}:
+                continue
+            counts[follow_up_state(app_data.get("next_action_at"))] += 1
+        summary = (
+            "<b>VESTHETIC — задачи на сегодня</b>\n\n"
+            f"🔴 {counts['overdue']} просрочено\n"
+            f"🟡 {counts['today']} на сегодня\n"
+            f"⚪ {counts['planned']} запланировано"
+        )
+        for staff_id in STAFF_IDS:
+            result = send_message(staff_id, summary)
+            if isinstance(result, dict) and result.get("ok"):
+                summary_sent = True
+    return {"reminded": reminded, "summary": summary_sent}
+
+
 def process_message(message):
     user_id = message.get("chat", {}).get("id")
     if not user_id:
@@ -572,6 +655,53 @@ def process_callback(query):
         u["state"] = None
         u["application"] = {}
         send_message(user_id, TEXTS[lang]["age_no"], main_keyboard(lang))
+    elif data.startswith("followup_done_") and user_id in STAFF_IDS:
+        try:
+            app_id = int(data.rsplit("_", 1)[1])
+        except ValueError:
+            return
+        app_data = get_application(app_id)
+        if not app_data:
+            answer_callback(callback_id, "Application not found")
+            return
+        updated = update_follow_up(app_id, "", "")
+        if updated is None:
+            answer_callback(callback_id, "Database update failed")
+            return
+        answer_callback(callback_id, "Готово")
+        message = query.get("message", {})
+        if message.get("chat", {}).get("id") and message.get("message_id"):
+            edit_message(message["chat"]["id"], message["message_id"],
+                         f"<b>✅ Follow-up #{app_id} выполнен</b>\n\n👤 {safe(app_data.get('name'))}")
+    elif data.startswith("followup_snooze_") and user_id in STAFF_IDS:
+        parts = data.split("_")
+        if len(parts) != 4:
+            return
+        try:
+            app_id = int(parts[2])
+        except ValueError:
+            return
+        app_data = get_application(app_id)
+        if not app_data:
+            answer_callback(callback_id, "Application not found")
+            return
+        now_local = datetime.now(timezone.utc).astimezone(CRM_TIMEZONE)
+        mode = parts[3]
+        if mode == "1h":
+            new_dt = now_local + timedelta(hours=1)
+        elif mode == "tomorrow":
+            new_dt = (now_local + timedelta(days=1)).replace(hour=9, minute=0, second=0, microsecond=0)
+        else:
+            return
+        updated = update_follow_up(app_id, app_data.get("next_action") or "", new_dt.strftime("%Y-%m-%dT%H:%M"))
+        if updated is None:
+            answer_callback(callback_id, "Database update failed")
+            return
+        answer_callback(callback_id, "Перенесено")
+        message = query.get("message", {})
+        if message.get("chat", {}).get("id") and message.get("message_id"):
+            edit_message(message["chat"]["id"], message["message_id"],
+                         followup_reminder_text(updated), followup_keyboard(app_id))
     elif data.startswith("status_") and user_id in STAFF_IDS:
         parts = data.split("_")
         if len(parts) != 3:
@@ -927,9 +1057,26 @@ table{{width:100%;border-collapse:collapse}}th,td{{padding:10px;border-bottom:1p
 <form method="post" action="/admin/follow-up" class="followup">
 <input type="hidden" name="id" value="{app_id}">
 <input name="next_action" value="{safe(a.get("next_action") or "")}" placeholder="Написать кандидату / назначить интервью / регистрация..." required>
-<input type="datetime-local" name="next_action_at" value="{safe(format_follow_up_local(a.get("next_action_at")))}">
+<input id="followup-at" type="datetime-local" name="next_action_at" value="{safe(format_follow_up_local(a.get("next_action_at")))}">
 <button type="submit">Сохранить follow-up</button>
-</form></div>
+</form>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+<button type="button" onclick="setFollowup(1)">+1 час</button>
+<button type="button" onclick="setFollowup(2)">Сегодня 18:00</button>
+<button type="button" onclick="setFollowup(3)">Завтра 09:00</button>
+<button type="button" onclick="setFollowup(4)">Через 3 дня</button>
+</div>
+<script>
+function pad(n){{return String(n).padStart(2,'0')}}
+function setFollowup(mode){{
+ const d=new Date();
+ if(mode===1)d.setHours(d.getHours()+1);
+ if(mode===2)d.setHours(18,0,0,0);
+ if(mode===3){{d.setDate(d.getDate()+1);d.setHours(9,0,0,0)}}
+ if(mode===4)d.setDate(d.getDate()+3);
+ document.getElementById('followup-at').value=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+}}
+</script></div>
 
 <div class="card"><h2>Внутренние заметки</h2>
 <div class="notes">{notes or 'Пока нет заметок.'}</div>
@@ -1010,6 +1157,21 @@ async def api_root():
 @app.get("/api/health")
 async def health():
     return {"ok": True}
+
+
+@app.get("/api/cron/followups")
+async def cron_followups(request: Request):
+    if not CRON_SECRET:
+        return PlainTextResponse("CRON_SECRET is not configured", status_code=503)
+    auth = request.headers.get("authorization", "")
+    if not secrets.compare_digest(auth, f"Bearer {CRON_SECRET}"):
+        return PlainTextResponse("Unauthorized", status_code=401)
+    try:
+        result = run_followup_jobs()
+        return result
+    except Exception as exc:
+        print("Follow-up cron error:", repr(exc))
+        return PlainTextResponse(f"Follow-up cron error: {exc}", status_code=500)
 
 
 @app.post("/api/webhook")
