@@ -320,7 +320,8 @@ async def detail(i:int,c:HTTPBasicCredentials=Depends(security)):
 <title>Заявка #{i}</title><style>body{{font-family:system-ui;background:#0b0b0b;color:#eee;max-width:900px;margin:auto;padding:20px}}a{{color:#fff}}.card{{background:#151515;border:1px solid #292929;border-radius:12px;padding:16px;margin:12px 0}}.grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px}}.item{{padding:9px;border-bottom:1px solid #292929}}button,textarea{{font:inherit;background:#222;color:#fff;border:1px solid #333;border-radius:8px;padding:10px}}textarea{{width:100%;min-height:100px}}@media(max-width:600px){{.grid{{grid-template-columns:1fr}}}}</style>
 <a href=/admin>← CRM</a><h1>Заявка #{i}</h1><div class=card><div class=grid>
 {''.join(f"<div class=item><b>{esc(k)}</b><br>{esc(v)}</div>" for k,v in [("Имя",a.get("name")),("Страна",a.get("country")),("Языки",a.get("languages")),("Опыт",a.get("experience")),("Оборудование",a.get("equipment")),("График",a.get("schedule")),("Контакт",a.get("contact")),("Источник",a.get("source")),("Telegram",a.get("telegram_username")),("Создана",a.get("created_at")),("Статус",LABELS.get(a.get("status"),a.get("status")))])}
-</div></div><div class=card><form method=post action=/admin/status><input type=hidden name=id value={i}>{buttons}</form></div>
+</div></div><div class=card><form method=post action=/admin/status><input type=hidden name=id value={i}>{buttons}</form>
+<form method=post action=/admin/delete style="margin-top:12px"><input type=hidden name=id value={i}><button type=submit>🗑 Удалить заявку</button></form></div>
 <div class=card><h2>Внутренние заметки</h2><pre>{esc(a.get("internal_notes") or "—")}</pre><form method=post action=/admin/note><input type=hidden name=id value={i}><textarea name=note required></textarea><br><button>＋ Добавить заметку</button></form></div>""")
 
 async def form(request):
@@ -334,6 +335,16 @@ async def status(request:Request,c:HTTPBasicCredentials=Depends(security)):
     r=sb("PATCH","applications",{"status":s,"status_changed_by_telegram_id":MANAGER_ID},{"id":f"eq.{i}","select":"*"})
     return RedirectResponse(f"/admin/application/{i}",303) if r else PlainTextResponse("Ошибка обновления",500)
 
+@app.post("/admin/delete")
+async def delete_request(request:Request,c:HTTPBasicCredentials=Depends(security)):
+    if not auth(c): return PlainTextResponse("Нет доступа",401)
+    f=await form(request); i=int(f.get("id",["0"])[0]); a=app_get(i)
+    if not a: return PlainTextResponse("Не найдено",404)
+    return HTMLResponse(f"""<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>
+<title>Удаление заявки #{i}</title><style>body{{font-family:system-ui;background:#0b0b0b;color:#eee;max-width:700px;margin:auto;padding:20px}}.card{{background:#151515;border:1px solid #292929;border-radius:12px;padding:20px;margin:20px 0}}button,a{{font:inherit;background:#222;color:#fff;border:1px solid #333;border-radius:8px;padding:10px 14px;text-decoration:none;display:inline-block}}.danger{{background:#441515;border-color:#662020}}</style>
+<div class=card><h1>Удалить заявку #{i}?</h1><p><b>{esc(a.get("name") or "Без имени")}</b> — {esc(a.get("country") or "—")}</p><p>Это действие удалит заявку из CRM.</p>
+<form method=post action=/admin/delete-confirm><input type=hidden name=id value={i}><button class=danger type=submit>Да, удалить</button> <a href=/admin/application/{i}>Отмена</a></form></div>""")
+
 @app.post("/admin/note")
 async def note(request:Request,c:HTTPBasicCredentials=Depends(security)):
     if not auth(c): return PlainTextResponse("Нет доступа",401)
@@ -343,6 +354,14 @@ async def note(request:Request,c:HTTPBasicCredentials=Depends(security)):
     value=(old+"\n" if old else "")+f"[{stamp}] {MANAGER_ID}: {note}"
     r=sb("PATCH","applications",{"internal_notes":value},{"id":f"eq.{i}","select":"*"})
     return RedirectResponse(f"/admin/application/{i}",303) if r else PlainTextResponse("Ошибка обновления",500)
+
+@app.post("/admin/delete-confirm")
+async def delete_confirm(request:Request,c:HTTPBasicCredentials=Depends(security)):
+    if not auth(c): return PlainTextResponse("Нет доступа",401)
+    f=await form(request); i=int(f.get("id",["0"])[0])
+    r=sb("DELETE","applications",query={"id":f"eq.{i}"})
+    if r is None: return PlainTextResponse("Ошибка удаления",500)
+    return RedirectResponse("/admin",303)
 
 @app.get("/api/cron/followups")
 async def followups(request:Request):
