@@ -703,15 +703,31 @@ button{{cursor:pointer}}a{{color:#fff}}.link{{text-decoration:none;background:#2
 .stat{{background:#111;border:1px solid #292929;border-radius:12px;padding:12px 15px;min-width:0}}
 .stat span{{color:#999;font-size:12px}}.stat b{{display:block;font-size:21px;margin-top:4px}}.analytics{{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px auto}}
 .card{{background:#111;border:1px solid #292929;border-radius:14px;padding:18px}}
+.action-center{{margin:18px auto;max-width:1600px}}
+.action-head{{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px}}
+.action-head h2{{margin:0 0 4px}}.action-head p{{margin:0}}
+.action-total{{text-align:right;background:#181818;border:1px solid #292929;border-radius:12px;padding:8px 14px;min-width:80px}}
+.action-total b{{display:block;font-size:22px}}.action-total span{{font-size:11px;color:#888}}
+.action-grid{{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}}
+.action-card{{display:flex;flex-direction:column;gap:3px;text-decoration:none;background:#151515;border:1px solid #292929;border-radius:12px;padding:14px;transition:.15s}}
+.action-card:hover{{background:#1b1b1b;transform:translateY(-1px)}}
+.action-card b{{font-size:24px}}.action-card span{{font-weight:700}}.action-card small{{color:#777}}
+.action-card.overdue b{{color:#ff6b6b}}.action-card.today b{{color:#ffd166}}.action-card.planned b{{color:#aaa}}
 .analytics table{{min-width:0}}
 
 @media(max-width:1100px){{
   body{{padding:20px}}
-  .stats{{grid-template-columns:repeat(4,1fr)}}
+   .stats{{grid-template-columns:repeat(4,1fr)}}
+  .action-grid{{grid-template-columns:repeat(2,1fr)}}
 }}
 
 @media(max-width:700px){{
   body{{padding:14px 12px;font-size:14px}}
+  .action-head{{align-items:flex-start}}
+  .action-grid{{grid-template-columns:1fr 1fr;gap:7px}}
+  .action-card{{padding:11px}}
+  .action-card b{{font-size:20px}}
+  .action-card small{{font-size:10px}}
   h1{{font-size:25px;margin-bottom:6px}}
   .stats{{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}}
   .stat{{padding:10px 12px}}.stat b{{font-size:19px}}
@@ -745,6 +761,14 @@ button{{cursor:pointer}}a{{color:#fff}}.link{{text-decoration:none;background:#2
 <h1>VESTHETIC <span class="muted">CRM</span></h1>
 <p class="muted">Recruitment pipeline • 1 manager</p>
 <div class="stats">{stat_html}</div>
+<div class="card action-center">
+<div class="action-head"><div><h2>Сегодня</h2><p class="muted">Что нужно сделать по кандидатам прямо сейчас</p></div><div class="action-total"><b>{followup_counts["overdue"] + followup_counts["today"]}</b><span>задач</span></div></div>
+<div class="action-grid">
+<a class="action-card overdue" href="#applications" data-quick-filter="overdue"><b>🔴 {followup_counts["overdue"]}</b><span>Просрочено</span><small>Требуют внимания</small></a>
+<a class="action-card today" href="#applications" data-quick-filter="today"><b>🟡 {followup_counts["today"]}</b><span>На сегодня</span><small>Запланированные действия</small></a>
+<a class="action-card planned" href="#applications" data-quick-filter="planned"><b>⚪ {followup_counts["planned"]}</b><span>Запланировано</span><small>Будущие follow-up</small></a>
+<a class="action-card empty" href="#applications" data-quick-filter="none"><b>—</b><span>Без follow-up</span><small>Кандидаты без следующего шага</small></a>
+</div></div>
 <div class="analytics">
 <div class="card"><h2>Воронка</h2><p class="muted">Новые → работа → контакт → интервью → регистрация → активна</p>
 <p>Новых: <b>{counts.get("new",0)}</b> · В работе: <b>{counts.get("progress",0)}</b> · Активны: <b>{counts.get("active",0)+counts.get("accept",0)}</b></p></div>
@@ -774,6 +798,12 @@ document.getElementById('search').addEventListener('input',filterRows);
 document.getElementById('statusFilter').addEventListener('change',filterRows);
 document.getElementById('countryFilter').addEventListener('change',filterRows);
 document.getElementById('followupFilter').addEventListener('change',filterRows);
+document.querySelectorAll('[data-quick-filter]').forEach(link=>{
+  link.addEventListener('click',()=>{
+    document.getElementById('followupFilter').value=link.dataset.quickFilter;
+    filterRows();
+  });
+});
 </script></body></html>"""
 
 
