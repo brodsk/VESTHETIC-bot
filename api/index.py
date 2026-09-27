@@ -155,7 +155,7 @@ def application_create(chat,username,d):
         f"<b>Schedule:</b> {esc(d.get('schedule'))}\n"
         f"<b>Contact:</b> {esc(d.get('contact'))}\n"
         f"<b>Source:</b> {esc(d.get('source'))}\n"
-        f"<b>Application:</b> #{esc(a.get('id'))}"
+        f"<b>Заявка:</b> #{esc(a.get('id'))}"
     )
     send(MANAGER_ID,msg)
     return a
@@ -245,7 +245,7 @@ def auth(c):
 
 @app.get("/admin",response_class=HTMLResponse)
 async def admin(c:HTTPBasicCredentials=Depends(security)):
-    if not auth(c): return HTMLResponse("Unauthorized",401,headers={"WWW-Authenticate":"Basic"})
+    if not auth(c): return HTMLResponse("Нет доступа",401,headers={"WWW-Authenticate":"Basic"})
     rows=apps(); counts={s:sum(1 for a in rows if a.get("status")==s) for s in STATUSES}
     trs=[]
     for a in rows:
@@ -253,49 +253,49 @@ async def admin(c:HTTPBasicCredentials=Depends(security)):
         trs.append(f"<tr><td>#{esc(i)}</td><td><a href='/admin/application/{esc(i)}'>{esc(a.get('name'))}</a></td><td>{esc(a.get('country'))}</td><td>{esc(a.get('languages'))}</td><td>{esc(a.get('status'))}</td><td>{esc(a.get('created_at'))}</td></tr>")
     stats=" ".join(f"<span class='stat'><b>{counts[s]}</b> {LABELS[s]}</span>" for s in STATUSES)
     return HTMLResponse(f"""<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>
-<title>VESTHETIC CRM</title><style>
+<title>VESTHETIC — CRM</title><style>
 body{{font-family:system-ui;background:#0b0b0b;color:#eee;max-width:1200px;margin:auto;padding:24px}}a{{color:#fff}}.stats{{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}}.stat,table{{background:#151515;border:1px solid #292929;border-radius:10px;padding:10px}}table{{width:100%;border-collapse:collapse;padding:0}}td,th{{padding:11px;border-bottom:1px solid #292929;text-align:left}}tr:last-child td{{border:0}}@media(max-width:700px){{body{{padding:12px;font-size:14px}}table{{font-size:12px}}th:nth-child(4),td:nth-child(4),th:nth-child(6),td:nth-child(6){{display:none}}}}
 </style><h1>VESTHETIC <small>CRM</small></h1><div class=stats>{stats}</div>
-<table><tr><th>ID</th><th>Name</th><th>Country</th><th>Languages</th><th>Status</th><th>Created</th></tr>{''.join(trs) or '<tr><td colspan=6>No applications</td></tr>'}</table>""")
+<table><tr><th>ID</th><th>Имя</th><th>Страна</th><th>Языки</th><th>Статус</th><th>Создана</th></tr>{''.join(trs) or '<tr><td colspan=6>Заявок пока нет</td></tr>'}</table>""")
 
 @app.get("/admin/application/{i}",response_class=HTMLResponse)
 async def detail(i:int,c:HTTPBasicCredentials=Depends(security)):
-    if not auth(c): return HTMLResponse("Unauthorized",401,headers={"WWW-Authenticate":"Basic"})
+    if not auth(c): return HTMLResponse("Нет доступа",401,headers={"WWW-Authenticate":"Basic"})
     a=app_get(i)
-    if not a: return HTMLResponse("Not found",404)
+    if not a: return HTMLResponse("Не найдено",404)
     buttons=" ".join(f"<button name=status value='{s}'>{LABELS[s]}</button>" for s in STATUSES if s!="new")
     return HTMLResponse(f"""<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>
-<title>Application #{i}</title><style>body{{font-family:system-ui;background:#0b0b0b;color:#eee;max-width:900px;margin:auto;padding:20px}}a{{color:#fff}}.card{{background:#151515;border:1px solid #292929;border-radius:12px;padding:16px;margin:12px 0}}.grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px}}.item{{padding:9px;border-bottom:1px solid #292929}}button,textarea{{font:inherit;background:#222;color:#fff;border:1px solid #333;border-radius:8px;padding:10px}}textarea{{width:100%;min-height:100px}}@media(max-width:600px){{.grid{{grid-template-columns:1fr}}}}</style>
-<a href=/admin>← CRM</a><h1>Application #{i}</h1><div class=card><div class=grid>
-{''.join(f"<div class=item><b>{esc(k)}</b><br>{esc(v)}</div>" for k,v in [("Name",a.get("name")),("Country",a.get("country")),("Languages",a.get("languages")),("Experience",a.get("experience")),("Equipment",a.get("equipment")),("Schedule",a.get("schedule")),("Contact",a.get("contact")),("Source",a.get("source")),("Telegram",a.get("telegram_username")),("Created",a.get("created_at")),("Status",LABELS.get(a.get("status"),a.get("status")))])}
+<title>Заявка #{i}</title><style>body{{font-family:system-ui;background:#0b0b0b;color:#eee;max-width:900px;margin:auto;padding:20px}}a{{color:#fff}}.card{{background:#151515;border:1px solid #292929;border-radius:12px;padding:16px;margin:12px 0}}.grid{{display:grid;grid-template-columns:1fr 1fr;gap:10px}}.item{{padding:9px;border-bottom:1px solid #292929}}button,textarea{{font:inherit;background:#222;color:#fff;border:1px solid #333;border-radius:8px;padding:10px}}textarea{{width:100%;min-height:100px}}@media(max-width:600px){{.grid{{grid-template-columns:1fr}}}}</style>
+<a href=/admin>← CRM</a><h1>Заявка #{i}</h1><div class=card><div class=grid>
+{''.join(f"<div class=item><b>{esc(k)}</b><br>{esc(v)}</div>" for k,v in [("Имя",a.get("name")),("Страна",a.get("country")),("Языки",a.get("languages")),("Опыт",a.get("experience")),("Оборудование",a.get("equipment")),("График",a.get("schedule")),("Контакт",a.get("contact")),("Источник",a.get("source")),("Telegram",a.get("telegram_username")),("Создана",a.get("created_at")),("Статус",LABELS.get(a.get("status"),a.get("status")))])}
 </div></div><div class=card><form method=post action=/admin/status><input type=hidden name=id value={i}>{buttons}</form></div>
-<div class=card><h2>Internal notes</h2><pre>{esc(a.get("internal_notes") or "—")}</pre><form method=post action=/admin/note><input type=hidden name=id value={i}><textarea name=note required></textarea><br><button>＋ Add note</button></form></div>""")
+<div class=card><h2>Внутренние заметки</h2><pre>{esc(a.get("internal_notes") or "—")}</pre><form method=post action=/admin/note><input type=hidden name=id value={i}><textarea name=note required></textarea><br><button>＋ Добавить заметку</button></form></div>""")
 
 async def form(request):
     raw=await request.body(); return urllib.parse.parse_qs(raw.decode(),keep_blank_values=True)
 
 @app.post("/admin/status")
 async def status(request:Request,c:HTTPBasicCredentials=Depends(security)):
-    if not auth(c): return PlainTextResponse("Unauthorized",401)
+    if not auth(c): return PlainTextResponse("Нет доступа",401)
     f=await form(request); i=int(f.get("id",["0"])[0]); s=f.get("status",[""])[0]
-    if s not in STATUSES: return PlainTextResponse("Invalid status",400)
+    if s not in STATUSES: return PlainTextResponse("Недопустимый статус",400)
     r=sb("PATCH","applications",{"status":s,"status_changed_by_telegram_id":MANAGER_ID},{"id":f"eq.{i}","select":"*"})
-    return RedirectResponse(f"/admin/application/{i}",303) if r else PlainTextResponse("Update failed",500)
+    return RedirectResponse(f"/admin/application/{i}",303) if r else PlainTextResponse("Ошибка обновления",500)
 
 @app.post("/admin/note")
 async def note(request:Request,c:HTTPBasicCredentials=Depends(security)):
-    if not auth(c): return PlainTextResponse("Unauthorized",401)
+    if not auth(c): return PlainTextResponse("Нет доступа",401)
     f=await form(request); i=int(f.get("id",["0"])[0]); note=f.get("note",[""])[0].strip(); a=app_get(i)
-    if not a: return PlainTextResponse("Not found",404)
+    if not a: return PlainTextResponse("Не найдено",404)
     old=(a.get("internal_notes") or "").strip(); stamp=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     value=(old+"\n" if old else "")+f"[{stamp}] {MANAGER_ID}: {note}"
     r=sb("PATCH","applications",{"internal_notes":value},{"id":f"eq.{i}","select":"*"})
-    return RedirectResponse(f"/admin/application/{i}",303) if r else PlainTextResponse("Update failed",500)
+    return RedirectResponse(f"/admin/application/{i}",303) if r else PlainTextResponse("Ошибка обновления",500)
 
 @app.get("/api/cron/followups")
 async def followups(request:Request):
     if not CRON_SECRET or not secrets.compare_digest(request.headers.get("authorization",""),f"Bearer {CRON_SECRET}"):
-        return PlainTextResponse("Unauthorized",401)
+        return PlainTextResponse("Нет доступа",401)
     return {"ok":True,"message":"Follow-up worker disabled in clean rebuild"}
 
 @app.get("/api/webhook")
