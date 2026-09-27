@@ -142,7 +142,23 @@ def application_create(chat,username,d):
         "languages":d.get("languages"),"experience":d.get("experience"),"equipment":d.get("equipment"),
         "schedule":d.get("schedule"),"contact":d.get("contact"),"source":d.get("source"),
         "status":"new","status_changed_by_telegram_id":None,"internal_notes":""})
-    return rows[0] if rows else None
+    if not rows:
+        return None
+    a=rows[0]
+    msg=(
+        "<b>🆕 New VESTHETIC application</b>\n\n"
+        f"<b>Name:</b> {esc(d.get('name'))}\n"
+        f"<b>Country:</b> {esc(d.get('country'))}\n"
+        f"<b>Languages:</b> {esc(d.get('languages'))}\n"
+        f"<b>Experience:</b> {esc(d.get('experience'))}\n"
+        f"<b>Equipment:</b> {esc(d.get('equipment'))}\n"
+        f"<b>Schedule:</b> {esc(d.get('schedule'))}\n"
+        f"<b>Contact:</b> {esc(d.get('contact'))}\n"
+        f"<b>Source:</b> {esc(d.get('source'))}\n"
+        f"<b>Application:</b> #{esc(a.get('id'))}"
+    )
+    send(MANAGER_ID,msg)
+    return a
 
 def app_get(i):
     r=sb("GET","applications",query={"id":f"eq.{i}","select":"*","limit":"1"}); return r[0] if r else None
