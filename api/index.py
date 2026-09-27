@@ -129,8 +129,12 @@ def user_get(chat,username):
     user_save(chat,username,u); return u
 
 def user_save(chat,username,u):
-    return sb("POST","bot_users",{"telegram_chat_id":chat,"telegram_username":username,
-        "language":u.get("lang","en"),"state":u.get("state"),"application_draft":u.get("application",{})})
+    payload={"telegram_chat_id":chat,"telegram_username":username,
+        "language":u.get("lang","en"),"state":u.get("state"),"application_draft":u.get("application",{})}
+    updated=sb("PATCH","bot_users",payload,{"telegram_chat_id":f"eq.{chat}","select":"*"})
+    if updated:
+        return updated
+    return sb("POST","bot_users",payload)
 
 def application_create(chat,username,d):
     rows=sb("POST","applications",{"telegram_chat_id":chat,"telegram_username":username,
