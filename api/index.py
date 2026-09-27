@@ -497,38 +497,68 @@ def admin_keyboard(app_id):
     ]}
 
 def status_label(status):
-    return {"accept": "🟢 Accepted", "progress": "🟡 In progress", "reject": "🔴 Rejected"}.get(status, "⚪ New")
+    return {
+        "accept": "🟢 Принята",
+        "progress": "🟡 В работе",
+        "reject": "🔴 Отклонена",
+    }.get(status, "⚪ Новая")
 
-def status_text(status):
-    return {"accept": "Application accepted.", "progress": "Application is now in progress.", "reject": "Application rejected."}.get(status, "Application status updated.")
+
+def status_text(status, lang="ru"):
+    texts = {
+        "ru": {"accept": "Заявка принята.", "progress": "Заявка взята в работу.", "reject": "Заявка отклонена."},
+        "ua": {"accept": "Заявку прийнято.", "progress": "Заявку взято в роботу.", "reject": "Заявку відхилено."},
+        "sk": {"accept": "Žiadosť bola prijatá.", "progress": "Žiadosť je v spracovaní.", "reject": "Žiadosť bola zamietnutá."},
+        "en": {"accept": "Application accepted.", "progress": "Application is now in progress.", "reject": "Application rejected."},
+    }
+    fallback = {
+        "ru": "Статус заявки обновлён.",
+        "ua": "Статус заявки оновлено.",
+        "sk": "Stav žiadosti bol aktualizovaný.",
+        "en": "Application status updated.",
+    }
+    return texts.get(lang, texts["en"]).get(status, fallback.get(lang, fallback["en"]))
+
 
 def application_text(app_id, data):
     return (
-        f"<b>VESTHETIC APPLICATION #{app_id}</b>\n"
-        f"👤 Name: {data.get('name','-')}\n"
-        f"🔞 Age: {'18+ confirmed' if data.get('age_confirmed') else '-'}\n"
-        f"🌍 Country: {data.get('country','-')}\n"
-        f"🗣 Languages: {data.get('languages','-')}\n"
-        f"💼 Experience: {data.get('experience','-')}\n"
-        f"🖥 Equipment: {data.get('equipment','-')}\n"
-        f"🕐 Schedule: {data.get('schedule','-')}\n"
+        f"<b>ЗАЯВКА VESTHETIC #{app_id}</b>\n"
+        f"👤 Имя: {data.get('name','-')}\n"
+        f"🔞 Возраст: {'18+ подтверждён' if data.get('age_confirmed') else '-'}\n"
+        f"🌍 Страна: {data.get('country','-')}\n"
+        f"🗣 Языки: {data.get('languages','-')}\n"
+        f"💼 Опыт: {data.get('experience','-')}\n"
+        f"🖥 Оборудование: {data.get('equipment','-')}\n"
+        f"🕐 График: {data.get('schedule','-')}\n"
         f"📱 Telegram: {data.get('contact','-')}\n"
-        f"📣 Source: {data.get('source','-')}\n\n"
-        f"<b>Status:</b> {status_label(data.get('status','new'))}"
+        f"📣 Источник: {data.get('source','-')}\n\n"
+        f"<b>Статус:</b> {status_label(data.get('status','new'))}"
     )
+
 
 def notify_candidate(app_id, data, status):
     candidate_id = data.get("telegram_chat_id")
-    if candidate_id:
-        send_message(candidate_id, f"<b>VESTHETIC</b>\n\n{status_text(status)}")
+    if not candidate_id:
+        return
+
+    user = load_user(candidate_id)
+    lang = user.get("lang", "en")
+    send_message(candidate_id, f"<b>VESTHETIC</b>\n\n{status_text(status, lang)}")
+
 
 def notify_admins(app_id, data):
     text = (
-        f"<b>NEW VESTHETIC APPLICATION #{app_id}</b>\n"
-        f"Name: {data.get('name','-')}\nAge: {data.get('age','-')}\nCountry: {data.get('country','-')}\n"
-        f"Languages: {data.get('languages','-')}\nExperience: {data.get('experience','-')}\n"
-        f"Equipment: {data.get('equipment','-')}\nSchedule: {data.get('schedule','-')}\n"
-        f"Telegram: {data.get('contact','-')}\nSource: {data.get('source','-')}"
+        f"<b>НОВАЯ ЗАЯВКА VESTHETIC #{app_id}</b>\n"
+        f"👤 Имя: {data.get('name','-')}\n"
+        f"🔞 Возраст: {'18+ подтверждён' if data.get('age_confirmed') else '-'}\n"
+        f"🌍 Страна: {data.get('country','-')}\n"
+        f"🗣 Языки: {data.get('languages','-')}\n"
+        f"💼 Опыт: {data.get('experience','-')}\n"
+        f"🖥 Оборудование: {data.get('equipment','-')}\n"
+        f"🕐 График: {data.get('schedule','-')}\n"
+        f"📱 Telegram: {data.get('contact','-')}\n"
+        f"📣 Источник: {data.get('source','-')}\n\n"
+        f"<b>Статус:</b> {status_label(data.get('status','new'))}"
     )
     recipients = list(dict.fromkeys(ADMIN_IDS + [MANAGER_ID]))
     for recipient_id in recipients:
@@ -683,7 +713,7 @@ def process_callback(query):
             return
 
         app = updated
-        answer_callback(callback_id, status_text(status))
+        answer_callback(callback_id, status_text(status, "ru"))
 
         message = query.get("message", {})
         message_chat_id = message.get("chat", {}).get("id")
@@ -700,9 +730,9 @@ def process_callback(query):
         notify_candidate(app_id, app, status)
 
         staff_notice = (
-            f"<b>Application #{app_id} updated</b>\n"
-            f"Status: {status_label(status)}\n"
-            f"Changed by: {user_id}"
+            f"<b>Заявка #{app_id} обновлена</b>\n"
+            f"Статус: {status_label(status)}\n"
+            f"Изменил: {user_id}"
         )
 
         for staff_id in STAFF_IDS:
