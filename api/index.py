@@ -346,8 +346,9 @@ def notify_admins(app_id, data):
         f"Equipment: {data.get('equipment','-')}\nSchedule: {data.get('schedule','-')}\n"
         f"Telegram: {data.get('contact','-')}\nSource: {data.get('source','-')}"
     )
-    for admin_id in ADMIN_IDS:
-        send_message(admin_id, text, admin_keyboard(app_id))
+    recipients = list(dict.fromkeys(ADMIN_IDS + [MANAGER_ID]))
+    for recipient_id in recipients:
+        send_message(recipient_id, text, admin_keyboard(app_id))
 
 def process_message(message):
     global next_application_id
