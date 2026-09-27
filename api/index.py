@@ -143,6 +143,36 @@ def manager_markup(i):
         {"text":"🔴 Отклонить","callback_data":f"mgr_reject_{i}"}
     ]]}
 
+def notify_candidate(app_data, action):
+    chat=app_data.get("telegram_chat_id")
+    if not chat:
+        return
+    user=user_get(chat, app_data.get("telegram_username"))
+    lang=user.get("lang") or "en"
+    messages={
+        "ru":{
+            "accept":"<b>Ваша заявка принята! 🟢</b>\\n\\nСпасибо за заявку. Менеджер VESTHETIC свяжется с вами и расскажет о следующих шагах.",
+            "progress":"<b>Ваша заявка взята в работу! 🟡</b>\\n\\nМенеджер VESTHETIC уже рассматривает вашу заявку и свяжется с вами в ближайшее время.",
+            "reject":"<b>Ваша заявка отклонена 🔴</b>\\n\\nСпасибо за интерес к VESTHETIC. Желаем вам успехов!"
+        },
+        "en":{
+            "accept":"<b>Your application has been accepted! 🟢</b>\\n\\nThank you for applying. A VESTHETIC manager will contact you with the next steps.",
+            "progress":"<b>Your application is now in progress! 🟡</b>\\n\\nA VESTHETIC manager is reviewing your application and will contact you soon.",
+            "reject":"<b>Your application has been declined 🔴</b>\\n\\nThank you for your interest in VESTHETIC. We wish you all the best!"
+        },
+        "sk":{
+            "accept":"<b>Vaša žiadosť bola prijatá! 🟢</b>\\n\\nĎakujeme za vašu žiadosť. Manažér VESTHETIC vás bude kontaktovať s ďalšími krokmi.",
+            "progress":"<b>Vaša žiadosť je v procese! 🟡</b>\\n\\nManažér VESTHETIC ju práve posudzuje a čoskoro vás bude kontaktovať.",
+            "reject":"<b>Vaša žiadosť bola zamietnutá 🔴</b>\\n\\nĎakujeme za váš záujem o VESTHETIC."
+        },
+        "ua":{
+            "accept":"<b>Вашу заявку прийнято! 🟢</b>\\n\\nДякуємо за заявку. Менеджер VESTHETIC зв’яжеться з вами щодо наступних кроків.",
+            "progress":"<b>Вашу заявку взято в роботу! 🟡</b>\\n\\nМенеджер VESTHETIC вже розглядає вашу заявку і скоро зв’яжеться з вами.",
+            "reject":"<b>Вашу заявку відхилено 🔴</b>\\n\\nДякуємо за інтерес до VESTHETIC."
+        }
+    }
+    send(chat,messages.get(lang,messages["en"])[action],kb_main(lang))
+
 def application_create(chat,username,d):
     rows=sb("POST","applications",{"telegram_chat_id":chat,"telegram_username":username,
         "name":d.get("name"),"age_confirmed":True,"country":d.get("country"),
@@ -235,6 +265,9 @@ def process_callback(c):
                 labels={"accept":"🟢 Заявка принята","progress":"🟡 Заявка взята в работу","reject":"🔴 Заявка отклонена"}
                 answer(cid,labels[action])
                 edit(chat,mid, f"<b>{labels[action]}</b>\\n\\nЗаявка #{i}")
+                candidate=app_get(i)
+                if candidate:
+                    notify_candidate(candidate, action)
         return
     if data=="age_yes":
         u["state"]="apply_name"; u["application"]={"age_confirmed":True}; user_save(chat,username,u)
