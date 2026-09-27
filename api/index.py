@@ -302,13 +302,13 @@ async def admin(c:HTTPBasicCredentials=Depends(security)):
     trs=[]
     for a in rows:
         i=a.get("id"); status=a.get("status","new")
-        trs.append(f"<tr><td>#{esc(i)}</td><td><a href='/admin/application/{esc(i)}'>{esc(a.get('name'))}</a></td><td>{esc(a.get('country'))}</td><td>{esc(a.get('languages'))}</td><td>{esc(a.get('status'))}</td><td>{esc(a.get('created_at'))}</td></tr>")
+        trs.append(f"<tr><td>#{esc(i)}</td><td><a href='/admin/application/{esc(i)}'>{esc(a.get('name'))}</a></td><td>{esc(a.get('country'))}</td><td>{esc(a.get('languages'))}</td><td>{esc(a.get('status'))}</td><td>{esc(a.get('created_at'))}</td><td><form method='post' action='/admin/delete' onsubmit="return confirm('Удалить заявку #'+{i}+'? Это действие нельзя отменить.');"><input type='hidden' name='id' value='{i}'><button class='danger'>🗑 Удалить</button></form></td></tr>")
     stats=" ".join(f"<span class='stat'><b>{counts[s]}</b> {LABELS[s]}</span>" for s in STATUSES)
     return HTMLResponse(f"""<!doctype html><meta name=viewport content='width=device-width,initial-scale=1'>
 <title>VESTHETIC — CRM</title><style>
-body{{font-family:system-ui;background:#0b0b0b;color:#eee;max-width:1200px;margin:auto;padding:24px}}a{{color:#fff}}.stats{{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}}.stat,table{{background:#151515;border:1px solid #292929;border-radius:10px;padding:10px}}table{{width:100%;border-collapse:collapse;padding:0}}td,th{{padding:11px;border-bottom:1px solid #292929;text-align:left}}tr:last-child td{{border:0}}@media(max-width:700px){{body{{padding:12px;font-size:14px}}table{{font-size:12px}}th:nth-child(4),td:nth-child(4),th:nth-child(6),td:nth-child(6){{display:none}}}}
+body{{font-family:system-ui;background:#0b0b0b;color:#eee;max-width:1200px;margin:auto;padding:24px}}a{{color:#fff}}.stats{{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}}.stat,table{{background:#151515;border:1px solid #292929;border-radius:10px;padding:10px}}table{{width:100%;border-collapse:collapse;padding:0}}td,th{{padding:11px;border-bottom:1px solid #292929;text-align:left}}tr:last-child td{{border:0}}@media(max-width:700px){{body{{padding:12px;font-size:14px}}table{{font-size:12px}}th:nth-child(4),td:nth-child(4),th:nth-child(6),td:nth-child(6){{display:none}}.danger{{background:#5b1717!important;border-color:#8b2b2b!important;color:#fff!important;cursor:pointer}}}}
 </style><h1>VESTHETIC <small>CRM</small></h1><div class=stats>{stats}</div>
-<table><tr><th>ID</th><th>Имя</th><th>Страна</th><th>Языки</th><th>Статус</th><th>Создана</th></tr>{''.join(trs) or '<tr><td colspan=6>Заявок пока нет</td></tr>'}</table>""")
+<table><tr><th>ID</th><th>Имя</th><th>Страна</th><th>Языки</th><th>Статус</th><th>Создана</th><th>Действия</th></tr>{''.join(trs) or '<tr><td colspan=6>Заявок пока нет</td></tr>'}</table>""")
 
 @app.get("/admin/application/{i}",response_class=HTMLResponse)
 async def detail(i:int,c:HTTPBasicCredentials=Depends(security)):
@@ -325,6 +325,16 @@ async def detail(i:int,c:HTTPBasicCredentials=Depends(security)):
 
 async def form(request):
     raw=await request.body(); return urllib.parse.parse_qs(raw.decode(),keep_blank_values=True)
+
+@app.post("/admin/delete")
+async def delete_application(request:Request,c:HTTPBasicCredentials=Depends(security)):
+    if not auth(c): return PlainTextResponse("Нет доступа",401)
+    f=await form(request)
+    try: i=int(f.get("id",["0"])[0])
+    except: return PlainTextResponse("Некорректный ID",400)
+    if i<=0: return PlainTextResponse("Некорректный ID",400)
+    r=sb("DELETE","applications",None,{"id":f"eq.{i}"})
+    return RedirectResponse("/admin",303) if r is not None else PlainTextResponse("Ошибка удаления",500)
 
 @app.post("/admin/status")
 async def status(request:Request,c:HTTPBasicCredentials=Depends(security)):
