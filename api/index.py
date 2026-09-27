@@ -5,18 +5,6 @@ import urllib.parse
 import json
 
 app = FastAPI()
-
-# ============================================================
-# VESTHETIC SETTINGS
-# ============================================================
-# Vercel-compatible entrypoint
-handler = app
-
-
-# ============================================================
-# VESTHETIC SETTINGS
-# ============================================================
-
 BOT_TOKEN = "8861881318:AAGobv6YMBoBgvX-Xrtx94W-iIK21RQvYBQ"
 
 ADMIN_IDS = [625577962]
