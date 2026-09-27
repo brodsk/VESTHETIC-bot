@@ -136,6 +136,13 @@ def user_save(chat,username,u):
         return updated
     return sb("POST","bot_users",payload)
 
+def manager_markup(i):
+    return {"inline_keyboard":[[
+        {"text":"🟢 Принять","callback_data":f"mgr_accept_{i}"},
+        {"text":"🟡 В работе","callback_data":f"mgr_progress_{i}"},
+        {"text":"🔴 Отклонить","callback_data":f"mgr_reject_{i}"}
+    ]]}
+
 def application_create(chat,username,d):
     rows=sb("POST","applications",{"telegram_chat_id":chat,"telegram_username":username,
         "name":d.get("name"),"age_confirmed":True,"country":d.get("country"),
@@ -157,7 +164,7 @@ def application_create(chat,username,d):
         f"<b>Source:</b> {esc(d.get('source'))}\n"
         f"<b>Заявка:</b> #{esc(a.get('id'))}"
     )
-    send(MANAGER_ID,msg)
+    send(MANAGER_ID,msg,manager_markup(a.get("id")))
     return a
 
 def app_get(i):
@@ -217,6 +224,18 @@ def process_callback(c):
         edit(chat,mid,TEXT[lang]["apply"],{"inline_keyboard":[[{"text":"18+","callback_data":"age_yes"},{"text":"Under 18","callback_data":"age_no"}]]}); answer(cid); return
     if data=="age_no":
         u["state"]=None; user_save(chat,username,u); edit(chat,mid,TEXT[lang]["no"]); answer(cid); return
+    if data.startswith("mgr_"):
+        parts=data.split("_")
+        if len(parts)==3 and str(parts[2]).isdigit():
+            i=int(parts[2])
+            status_map={"accept":"active","progress":"progress","reject":"reject"}
+            action=parts[1]
+            if action in status_map:
+                sb("PATCH","applications",{"status":status_map[action],"status_changed_by_telegram_id":MANAGER_ID},{"id":f"eq.{i}"})
+                labels={"accept":"🟢 Заявка принята","progress":"🟡 Заявка взята в работу","reject":"🔴 Заявка отклонена"}
+                answer(cid,labels[action])
+                edit(chat,mid, f"<b>{labels[action]}</b>\\n\\nЗаявка #{i}")
+        return
     if data=="age_yes":
         u["state"]="apply_name"; u["application"]={"age_confirmed":True}; user_save(chat,username,u)
         edit(chat,mid,TEXT[lang]["name"]); answer(cid); return
