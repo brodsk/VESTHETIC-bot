@@ -282,6 +282,14 @@ def append_internal_note(app_id, note, actor_id):
     return rows[0] if isinstance(rows, list) and rows else None
 
 
+def update_follow_up(app_id, next_action, next_action_at):
+    rows = supabase_request("PATCH", "applications", {
+        "next_action": next_action.strip(),
+        "next_action_at": next_action_at.strip() if next_action_at else None,
+    }, {"id": f"eq.{app_id}", "select": "*"})
+    return rows[0] if isinstance(rows, list) and rows else None
+
+
 def telegram(method, data=None):
     try:
         encoded = urllib.parse.urlencode(data or {}).encode("utf-8")
@@ -543,6 +551,7 @@ def dashboard_html(apps):
 <td><b>#{app_id}</b></td><td>{safe(a.get('name'))}</td><td>{safe(a.get('country'))}</td>
 <td>{safe(a.get('languages'))}</td><td>{safe(a.get('experience'))}</td><td>{safe(a.get('schedule'))}</td>
 <td class="badge">{status_label(status)}</td><td>{contact_link}</td>
+<td>{safe(a.get('next_action') or '—')}</td>
 <td><a class="link" href="/admin/application/{app_id}">Подробнее</a></td>
 </tr>""")
 
@@ -605,7 +614,8 @@ button{{cursor:pointer}}a{{color:#fff}}.link{{text-decoration:none;background:#2
   #applications td:nth-child(6)::before{{content:"График"}}
   #applications td:nth-child(7)::before{{content:"Статус"}}
   #applications td:nth-child(8)::before{{content:"Контакт"}}
-  #applications td:nth-child(9)::before{{content:"Карточка"}}
+  #applications td:nth-child(9)::before{{content:"Следующее действие"}}
+  #applications td:nth-child(10)::before{{content:"Карточка"}}
   #applications .link{{width:100%;text-align:center;padding:9px}}
   .analytics table{{min-width:0}}
   .analytics th,.analytics td{{padding:8px}}
@@ -627,7 +637,7 @@ button{{cursor:pointer}}a{{color:#fff}}.link{{text-decoration:none;background:#2
 <select id="countryFilter"><option value="">Все страны</option>{country_options}</select>
 </div>
 <div class="wrap"><table id="applications"><thead><tr>
-<th>ID</th><th>Имя</th><th>Страна</th><th>Языки</th><th>Опыт</th><th>График</th><th>Статус</th><th>Контакт</th><th>Карточка</th>
+<th>ID</th><th>Имя</th><th>Страна</th><th>Языки</th><th>Опыт</th><th>График</th><th>Статус</th><th>Контакт</th><th>Следующее действие</th><th>Карточка</th>
 </tr></thead><tbody>{''.join(rows)}</tbody></table></div>
 <script>
 function filterRows(){{
@@ -687,6 +697,8 @@ button{{border:0;border-radius:8px;padding:10px 12px;margin:4px;cursor:pointer;b
 textarea{{width:100%;box-sizing:border-box;min-height:130px;border:0;border-radius:10px;padding:12px;background:#181818;color:#fff;font:inherit;resize:vertical}}
 table{{width:100%;border-collapse:collapse}}th,td{{padding:10px;border-bottom:1px solid #292929;text-align:left;vertical-align:top}}
 .notes{{white-space:pre-wrap;background:#0d0d0d;border-radius:10px;padding:12px;margin-bottom:12px;overflow-wrap:anywhere}}
+.followup{{display:grid;grid-template-columns:2fr 1fr auto;gap:8px}}.followup input{{border:0;border-radius:9px;padding:10px;background:#181818;color:#fff;font:inherit}}
+@media(max-width:700px){{.followup{{grid-template-columns:1fr}}}}
 
 @media(max-width:700px){{
   body{{padding:14px 12px;font-size:14px}}
@@ -717,9 +729,19 @@ table{{width:100%;border-collapse:collapse}}th,td{{padding:10px;border-bottom:1p
 <div class="item"><span class="label">Создана</span>{safe(a.get("created_at"))}</div>
 <div class="item"><span class="label">Обновлена</span>{safe(a.get("updated_at"))}</div>
 <div class="item"><span class="label">Статус</span><b>{status_label(a.get("status","new"))}</b></div>
+<div class="item"><span class="label">Следующее действие</span>{safe(a.get("next_action") or "Не задано")}</div>
+<div class="item"><span class="label">Дата следующего действия</span>{safe(a.get("next_action_at") or "Не задана")}</div>
 </div></div>
 
 <div class="card"><h2>Воронка</h2><form class="funnel" method="post" action="/admin/status"><input type="hidden" name="id" value="{app_id}">{buttons}</form></div>
+
+<div class="card"><h2>Следующее действие</h2>
+<form method="post" action="/admin/follow-up" class="followup">
+<input type="hidden" name="id" value="{app_id}">
+<input name="next_action" value="{safe(a.get("next_action") or "")}" placeholder="Написать кандидату / назначить интервью / регистрация..." required>
+<input type="datetime-local" name="next_action_at" value="{safe((a.get("next_action_at") or "").replace("Z","").replace("+00:00",""))}">
+<button type="submit">Сохранить follow-up</button>
+</form></div>
 
 <div class="card"><h2>Внутренние заметки</h2>
 <div class="notes">{notes or 'Пока нет заметок.'}</div>
@@ -751,6 +773,25 @@ async def admin_status(request: Request, credentials: HTTPBasicCredentials = Dep
     except Exception as exc:
         print("Admin status error:", repr(exc))
         return PlainTextResponse(f"Admin status error: {exc}", status_code=500)
+
+
+@app.post("/admin/follow-up")
+async def admin_follow_up(request: Request, credentials: HTTPBasicCredentials = Depends(security)):
+    if not require_admin(credentials):
+        return PlainTextResponse("Unauthorized", status_code=401, headers={"WWW-Authenticate": "Basic"})
+    try:
+        raw = await request.body()
+        form = urllib.parse.parse_qs(raw.decode("utf-8"), keep_blank_values=True)
+        app_id = int((form.get("id") or [""])[0])
+        next_action = (form.get("next_action") or [""])[0]
+        next_action_at = (form.get("next_action_at") or [""])[0]
+        updated = update_follow_up(app_id, next_action, next_action_at)
+        if updated is None:
+            return PlainTextResponse("Application not found or follow-up save failed", status_code=404)
+        return RedirectResponse(f"/admin/application/{app_id}", status_code=303)
+    except Exception as exc:
+        print("Admin follow-up error:", repr(exc))
+        return PlainTextResponse(f"Admin follow-up error: {exc}", status_code=500)
 
 
 @app.post("/admin/note")
