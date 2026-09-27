@@ -257,7 +257,7 @@ def process_message(m):
     lang=u["lang"]
     if text.startswith("/start"):
         u={"lang":lang,"state":None,"application":{}}; user_save(chat,username,u)
-        send(chat,"Choose your language / Выберите язык:",kb_lang()); return
+        send(chat,TEXT[lang]["language_prompt"],kb_lang()); return
     state=u.get("state")
     if state and state.startswith("apply_"):
         steps=["apply_name","apply_country","apply_languages","apply_experience","apply_equipment","apply_schedule","apply_contact","apply_source"]
@@ -275,7 +275,7 @@ def process_message(m):
             a=application_create(chat,username,u["application"])
             u={"lang":lang,"state":None,"application":{}}
             user_save(chat,username,u)
-            send(chat,TEXT[lang]["thanks"] if a else "Could not save the application. Please try again.",kb_main(lang)); return
+            send(chat,TEXT[lang]["thanks"] if a else TEXT[lang]["save_error"],kb_main(lang)); return
         u["state"]=steps[idx+1]; user_save(chat,username,u)
         send(chat,TEXT[lang][steps[idx+1].replace("apply_","")]); return
     if text in ("/help",):
@@ -290,7 +290,7 @@ def process_callback(c):
     if data.startswith("lang_"):
         lang=data[5:] if data[5:] in TEXT else "en"; u["lang"]=lang; u["state"]=None; user_save(chat,username,u)
         edit(chat,mid,TEXT[lang]["welcome"],kb_main(lang)); answer(cid); return
-    if data=="language": edit(chat,mid,"Choose your language:",kb_lang()); answer(cid); return
+    if data=="language": edit(chat,mid,TEXT[lang]["language_prompt"],kb_lang()); answer(cid); return
     if data in ("about","terms","faq","manager"):
         edit(chat,mid,TEXT[lang][data],kb_main(lang)); answer(cid); return
     if data=="apply":
