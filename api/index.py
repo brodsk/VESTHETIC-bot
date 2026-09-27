@@ -11,6 +11,8 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 ADMIN_IDS = [625577962]
 MANAGER_ID = 8965656829
 MANAGER_USERNAME = "VESTHETIC_manager"
+# Staff members allowed to process applications
+STAFF_IDS = list(dict.fromkeys(ADMIN_IDS + [MANAGER_ID]))
 
 TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
@@ -417,7 +419,7 @@ def process_callback(query):
     elif data == "age_no":
         u["state"] = None
         send_message(user_id, TEXTS[lang]["age_no"], main_keyboard(lang))
-    elif data.startswith("status_") and user_id in ADMIN_IDS:
+    elif data.startswith("status_") and user_id in STAFF_IDS:
         parts = data.split("_")
         if len(parts) == 3:
             try:
