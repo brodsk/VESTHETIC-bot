@@ -44,11 +44,13 @@ TEXT = {
         "thanks":"<b>Заявка отправлена ✅</b>\n\nМенеджер VESTHETIC рассмотрит её и свяжется с вами.",
         "no":"К сожалению, VESTHETIC работает только с совершеннолетними.",
         "manager":"<b>Менеджер VESTHETIC</b>\n\n@VESTHETIC_manager",
+        "language_prompt":"Выберите язык:",
+        "save_error":"Не удалось сохранить заявку. Попробуйте ещё раз."
     },
     "en": {
         "welcome":"<b>VESTHETIC | Digital Talent Agency</b>\n\nWe help adult online creators build careers on international platforms.\n\n18+ only • Voluntary • Global",
         "about":"<b>VESTHETIC</b>\n\nDigital Talent Agency for adult online creators.\n\n<b>Model:</b> 75% creator / 25% VESTHETIC",
-        "terms":"<b>Terms</b>\n\n• 18+ only\n• Voluntary participation\n• 75% creator\n• 25% VESTHETIC",
+        "terms":"<b>Terms</b>\n\n• 18+ only\n• Voluntary participation\n• 75% creator\n• 25% VESTHETIC\n\nDo not send documents or banking details through Telegram.",
         "faq":"<b>FAQ</b>\n\nNo experience is required. Work can be done from home. Adults only.",
         "apply":"<b>Application</b>\n\nIt takes a few minutes. By continuing, you confirm you are 18+ and participating voluntarily.",
         "age":"Are you 18 or older?",
@@ -56,17 +58,59 @@ TEXT = {
         "country":"Which country are you currently in?",
         "languages":"Which languages do you speak?",
         "experience":"Do you have experience on similar platforms?",
-        "equipment":"What equipment do you have? Phone, PC, camera, lighting, etc.",
+        "equipment":"What equipment do you have? For example: phone, PC, camera, lighting.",
         "schedule":"How much time per day or week can you dedicate?",
         "contact":"Provide a Telegram contact for the manager.",
         "source":"How did you hear about VESTHETIC?",
         "thanks":"<b>Application submitted ✅</b>\n\nA VESTHETIC manager will review it and contact you.",
         "no":"VESTHETIC works only with adults.",
         "manager":"<b>VESTHETIC Manager</b>\n\n@VESTHETIC_manager",
+        "language_prompt":"Choose your language:",
+        "save_error":"Could not save the application. Please try again."
+    },
+    "sk": {
+        "welcome":"<b>VESTHETIC | Digital Talent Agency</b>\n\nPomáhame dospelým online tvorcom budovať kariéru na medzinárodných platformách.\n\nIba 18+ • Dobrovoľné • Globálne",
+        "about":"<b>VESTHETIC</b>\n\nDigitálna talentová agentúra pre dospelých online tvorcov.\n\n<b>Model:</b> 75 % creator / 25 % VESTHETIC",
+        "terms":"<b>Podmienky</b>\n\n• Iba 18+\n• Dobrovoľná účasť\n• 75 % príjmu — creator\n• 25 % — VESTHETIC\n\nNeposielajte dokumenty ani bankové údaje cez Telegram.",
+        "faq":"<b>FAQ</b>\n\nSkúsenosti nie sú potrebné. Pracovať môžete z domu. Účasť je len pre dospelých.",
+        "apply":"<b>Žiadosť</b>\n\nVyplnenie trvá niekoľko minút. Pokračovaním potvrdzujete, že máte 18+ a účasť je dobrovoľná.",
+        "age":"Máte už 18 rokov?",
+        "name":"Ako sa voláte alebo aký pseudonym chcete používať?",
+        "country":"V ktorej krajine sa momentálne nachádzate?",
+        "languages":"Akými jazykmi hovoríte?",
+        "experience":"Máte skúsenosti s podobnými platformami?",
+        "equipment":"Aké vybavenie máte? Napríklad telefón, PC, kamera, osvetlenie.",
+        "schedule":"Koľko času denne alebo týždenne môžete venovať práci?",
+        "contact":"Uveďte Telegram kontakt, na ktorom vás môže manažér kontaktovať.",
+        "source":"Ako ste sa dozvedeli o VESTHETIC?",
+        "thanks":"<b>Žiadosť bola odoslaná ✅</b>\n\nManažér VESTHETIC ju posúdi a bude vás kontaktovať.",
+        "no":"VESTHETIC spolupracuje iba s dospelými.",
+        "manager":"<b>Manažér VESTHETIC</b>\n\n@VESTHETIC_manager",
+        "language_prompt":"Vyberte si jazyk:",
+        "save_error":"Žiadosť sa nepodarilo uložiť. Skúste to znova."
+    },
+    "ua": {
+        "welcome":"<b>VESTHETIC | Digital Talent Agency</b>\n\nМи допомагаємо повнолітнім онлайн-креаторам будувати кар'єру на міжнародних платформах.\n\nТільки 18+ • Добровільно • Глобально",
+        "about":"<b>VESTHETIC</b>\n\nDigital Talent Agency для дорослих онлайн-креаторів.\n\n<b>Модель:</b> 75% creator / 25% VESTHETIC",
+        "terms":"<b>Умови</b>\n\n• Тільки 18+\n• Участь добровільна\n• 75% доходу — creator\n• 25% — VESTHETIC\n\nНе надсилайте документи або банківські дані через Telegram.",
+        "faq":"<b>FAQ</b>\n\nДосвід не обов'язковий. Можна працювати з дому. Участь лише для повнолітніх.",
+        "apply":"<b>Заявка</b>\n\nЗаповнення займе кілька хвилин. Продовжуючи, ви підтверджуєте, що вам 18+ і участь добровільна.",
+        "age":"Вам уже виповнилося 18 років?",
+        "name":"Як вас звати або який псевдонім ви хочете використовувати?",
+        "country":"У якій країні ви зараз перебуваєте?",
+        "languages":"Якими мовами ви володієте?",
+        "experience":"Чи маєте ви досвід роботи на подібних платформах?",
+        "equipment":"Яке обладнання у вас є? Наприклад: телефон, ПК, камера, освітлення.",
+        "schedule":"Скільки часу на день або тиждень ви готові приділяти роботі?",
+        "contact":"Вкажіть Telegram-контакт для зв'язку з менеджером.",
+        "source":"Як ви дізналися про VESTHETIC?",
+        "thanks":"<b>Заявку надіслано ✅</b>\n\nМенеджер VESTHETIC розгляне її та зв'яжеться з вами.",
+        "no":"На жаль, VESTHETIC працює лише з повнолітніми.",
+        "manager":"<b>Менеджер VESTHETIC</b>\n\n@VESTHETIC_manager",
+        "language_prompt":"Оберіть мову:",
+        "save_error":"Не вдалося зберегти заявку. Спробуйте ще раз."
     },
 }
-TEXT["sk"]=TEXT["en"]; TEXT["ua"]=TEXT["ru"]
-
 def sb(method, path, payload=None, query=None):
     if not SUPABASE_KEY: return None
     url=f"{SUPABASE_URL}/rest/v1/{path}"
