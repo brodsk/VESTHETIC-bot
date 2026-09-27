@@ -1,11 +1,15 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import PlainTextResponse, JSONResponse
+from fastapi.responses import PlainTextResponse, JSONResponse, HTMLResponse, RedirectResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+import secrets
+import html
 import urllib.request
 import urllib.parse
 import json
 import os
 
 app = FastAPI()
+security = HTTPBasic()
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 
 ADMIN_IDS = [625577962]
@@ -23,6 +27,8 @@ TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://xtxqslzublggqhctmjoa.supabase.co").rstrip("/")
 SUPABASE_SERVICE_ROLE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+ADMIN_PANEL_USER = os.environ.get("ADMIN_PANEL_USER", "admin")
+ADMIN_PANEL_PASSWORD = os.environ.get("ADMIN_PANEL_PASSWORD", "")
 
 def load_user(chat_id, username=None):
     rows = supabase_request(
@@ -704,6 +710,87 @@ def process_callback(query):
                 send_message(staff_id, staff_notice)
 
     save_user(user_id, username, u)
+
+
+
+def require_admin(credentials: HTTPBasicCredentials):
+    if not ADMIN_PANEL_PASSWORD:
+        return False
+    return (
+        secrets.compare_digest(credentials.username, ADMIN_PANEL_USER)
+        and secrets.compare_digest(credentials.password, ADMIN_PANEL_PASSWORD)
+    )
+
+
+def dashboard_html(apps):
+    rows = []
+    for app in apps:
+        app_id = app.get("id")
+        status = app.get("status", "new")
+        label = status_label(status)
+        rows.append(f"""
+        <tr>
+          <td><b>#{app_id}</b></td>
+          <td>{html.escape(str(app.get("name") or "-"))}</td>
+          <td>{html.escape(str(app.get("country") or "-"))}</td>
+          <td>{html.escape(str(app.get("languages") or "-"))}</td>
+          <td>{html.escape(str(app.get("experience") or "-"))}</td>
+          <td>{html.escape(str(app.get("schedule") or "-"))}</td>
+          <td>{label}</td>
+          <td>
+            <form method="post" action="/admin/status" style="display:inline">
+              <input type="hidden" name="id" value="{app_id}">
+              <button name="status" value="accept">🟢</button>
+              <button name="status" value="progress">🟡</button>
+              <button name="status" value="reject">🔴</button>
+            </form>
+          </td>
+        </tr>""")
+    return """<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VESTHETIC CRM</title>
+<style>
+body{font-family:system-ui;background:#0b0b0b;color:#eee;margin:0;padding:24px}
+h1{letter-spacing:.08em}.wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:1050px}
+th,td{padding:12px;border-bottom:1px solid #292929;text-align:left}th{color:#999;font-size:12px;text-transform:uppercase}
+button{border:0;border-radius:8px;padding:7px 9px;margin-right:4px;cursor:pointer;background:#222;color:#fff}
+.badge{font-weight:700}.muted{color:#888}
+</style></head><body>
+<h1>VESTHETIC <span class="muted">CRM</span></h1>
+<p class="muted">Applications</p><div class="wrap"><table>
+<thead><tr><th>ID</th><th>Name</th><th>Country</th><th>Languages</th><th>Experience</th><th>Schedule</th><th>Status</th><th>Change</th></tr></thead>
+<tbody>""" + "".join(rows) + """</tbody></table></div></body></html>"""
+
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin_dashboard(credentials: HTTPBasicCredentials = __import__("fastapi").Depends(security)):
+    if not require_admin(credentials):
+        return HTMLResponse("Unauthorized", status_code=401, headers={"WWW-Authenticate": "Basic"})
+    apps = supabase_request(
+        "GET",
+        "applications",
+        query={"select":"*","order":"created_at.desc","limit":"100"},
+    ) or []
+    return HTMLResponse(dashboard_html(apps))
+
+
+@app.post("/admin/status")
+async def admin_status(request: Request, credentials: HTTPBasicCredentials = __import__("fastapi").Depends(security)):
+    if not require_admin(credentials):
+        return PlainTextResponse("Unauthorized", status_code=401, headers={"WWW-Authenticate": "Basic"})
+    form = await request.form()
+    try:
+        app_id = int(form.get("id"))
+    except (TypeError, ValueError):
+        return PlainTextResponse("Invalid application ID", status_code=400)
+    status = str(form.get("status") or "")
+    if status not in ("accept","progress","reject"):
+        return PlainTextResponse("Invalid status", status_code=400)
+    updated = update_application_status(app_id, status)
+    if updated is None:
+        return PlainTextResponse("Application not found or update failed", status_code=404)
+    notify_candidate(app_id, updated, status)
+    return RedirectResponse("/admin", status_code=303)
 
 
 @app.get("/api")
