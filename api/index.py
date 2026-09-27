@@ -257,7 +257,7 @@ def process_message(m):
     lang=u["lang"]
     if text.startswith("/start"):
         u={"lang":lang,"state":None,"application":{}}; user_save(chat,username,u)
-        send(chat,TEXT[lang]["language_prompt"],kb_lang()); return
+        send(chat,"<b>VESTHETIC</b>",kb_lang()); return
     state=u.get("state")
     if state and state.startswith("apply_"):
         steps=["apply_name","apply_country","apply_languages","apply_experience","apply_equipment","apply_schedule","apply_contact","apply_source"]
