@@ -11,6 +11,7 @@ from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo
 
 app = FastAPI()
+# Vercel deployment marker: keep FastAPI app discoverable at module top level.
 security = HTTPBasic()
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
