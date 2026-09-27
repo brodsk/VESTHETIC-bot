@@ -766,13 +766,18 @@ def require_admin(credentials: HTTPBasicCredentials):
 
 
 def dashboard_html(apps):
+    counts = {"new": 0, "progress": 0, "accept": 0, "reject": 0}
+    countries = sorted({str(a.get("country") or "").strip() for a in apps if str(a.get("country") or "").strip()})
+    for app in apps:
+        counts[app.get("status", "new")] = counts.get(app.get("status", "new"), 0) + 1
+
     rows = []
     for app in apps:
         app_id = app.get("id")
         status = app.get("status", "new")
         label = status_label(status)
         rows.append(f"""
-        <tr>
+        <tr data-status="{html.escape(status)}" data-country="{html.escape(str(app.get("country") or ""))}">
           <td><b>#{app_id}</b></td>
           <td>{html.escape(str(app.get("name") or "-"))}</td>
           <td>{html.escape(str(app.get("country") or "-"))}</td>
@@ -790,20 +795,70 @@ def dashboard_html(apps):
             </form>
           </td>
         </tr>""")
-    return """<!doctype html>
+
+    country_options = "".join(
+        f'<option value="{html.escape(country, quote=True)}">{html.escape(country)}</option>'
+        for country in countries
+    )
+
+    return f"""<!doctype html>
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>VESTHETIC CRM</title>
 <style>
-body{font-family:system-ui;background:#0b0b0b;color:#eee;margin:0;padding:24px}
-h1{letter-spacing:.08em}.wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:1050px}
-th,td{padding:12px;border-bottom:1px solid #292929;text-align:left}th{color:#999;font-size:12px;text-transform:uppercase}
-button{border:0;border-radius:8px;padding:7px 9px;margin-right:4px;cursor:pointer;background:#222;color:#fff}
-.badge{font-weight:700}.muted{color:#888}
+body{{font-family:system-ui;background:#0b0b0b;color:#eee;margin:0;padding:24px}}
+h1{{letter-spacing:.08em}}.wrap{{overflow:auto}}table{{width:100%;border-collapse:collapse;min-width:1050px}}
+th,td{{padding:12px;border-bottom:1px solid #292929;text-align:left}}th{{color:#999;font-size:12px;text-transform:uppercase}}
+button,select,input{{border:0;border-radius:8px;padding:9px 10px;background:#181818;color:#fff}}
+button{{cursor:pointer}}.badge{{font-weight:700}}.muted{{color:#888}}
+.toolbar{{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}}
+.toolbar input{{min-width:240px}}.stats{{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}}
+.stat{{background:#111;border:1px solid #292929;border-radius:12px;padding:12px 16px;min-width:110px}}
+.stat b{{display:block;font-size:22px;margin-top:3px}}
 </style></head><body>
 <h1>VESTHETIC <span class="muted">CRM</span></h1>
-<p class="muted">Заявки</p><div class="wrap"><table>
+<p class="muted">Заявки</p>
+<div class="stats">
+  <div class="stat">Всего<b>{len(apps)}</b></div>
+  <div class="stat">⚪ Новые<b>{counts.get("new",0)}</b></div>
+  <div class="stat">🟡 В работе<b>{counts.get("progress",0)}</b></div>
+  <div class="stat">🟢 Принятые<b>{counts.get("accept",0)}</b></div>
+  <div class="stat">🔴 Отклонённые<b>{counts.get("reject",0)}</b></div>
+</div>
+<div class="toolbar">
+  <input id="search" type="search" placeholder="Поиск по имени, стране, языкам, ID...">
+  <select id="statusFilter">
+    <option value="">Все статусы</option>
+    <option value="new">Новые</option>
+    <option value="progress">В работе</option>
+    <option value="accept">Принятые</option>
+    <option value="reject">Отклонённые</option>
+  </select>
+  <select id="countryFilter">
+    <option value="">Все страны</option>
+    {country_options}
+  </select>
+</div>
+<div class="wrap"><table id="applications">
 <thead><tr><th>ID</th><th>Имя</th><th>Страна</th><th>Языки</th><th>Опыт</th><th>График</th><th>Статус</th><th>Действия</th></tr></thead>
-<tbody>""" + "".join(rows) + """</tbody></table></div></body></html>"""
+<tbody>{''.join(rows)}</tbody></table></div>
+<script>
+function filterRows(){{
+  const q=document.getElementById('search').value.toLowerCase().trim();
+  const s=document.getElementById('statusFilter').value;
+  const country=document.getElementById('countryFilter').value.toLowerCase();
+  document.querySelectorAll('#applications tbody tr').forEach(row=>{{
+    const text=row.innerText.toLowerCase();
+    const okSearch=!q||text.includes(q);
+    const okStatus=!s||row.dataset.status===s;
+    const okCountry=!country||row.dataset.country.toLowerCase()===country;
+    row.style.display=okSearch&&okStatus&&okCountry?'':'none';
+  }});
+}}
+document.getElementById('search').addEventListener('input',filterRows);
+document.getElementById('statusFilter').addEventListener('change',filterRows);
+document.getElementById('countryFilter').addEventListener('change',filterRows);
+</script>
+</body></html>"""
 
 
 @app.get("/admin", response_class=HTMLResponse)
