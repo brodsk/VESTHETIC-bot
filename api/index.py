@@ -787,8 +787,8 @@ button{border:0;border-radius:8px;padding:7px 9px;margin-right:4px;cursor:pointe
 .badge{font-weight:700}.muted{color:#888}
 </style></head><body>
 <h1>VESTHETIC <span class="muted">CRM</span></h1>
-<p class="muted">Applications</p><div class="wrap"><table>
-<thead><tr><th>ID</th><th>Name</th><th>Country</th><th>Languages</th><th>Experience</th><th>Schedule</th><th>Status</th><th>Change</th></tr></thead>
+<p class="muted">Заявки</p><div class="wrap"><table>
+<thead><tr><th>ID</th><th>Имя</th><th>Страна</th><th>Языки</th><th>Опыт</th><th>График</th><th>Статус</th><th>Изменить</th></tr></thead>
 <tbody>""" + "".join(rows) + """</tbody></table></div></body></html>"""
 
 
