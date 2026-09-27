@@ -6,6 +6,9 @@ import json
 
 app = FastAPI()
 
+# ============================================================
+# VESTHETIC SETTINGS
+# ============================================================
 # Vercel-compatible entrypoint
 handler = app
 
