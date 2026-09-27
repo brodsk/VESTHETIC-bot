@@ -559,14 +559,57 @@ def dashboard_html(apps):
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>VESTHETIC CRM</title>
 <style>
-body{{font-family:system-ui;background:#0b0b0b;color:#eee;margin:0;padding:22px}}h1{{letter-spacing:.08em}}
-.wrap{{overflow:auto}}table{{width:100%;border-collapse:collapse;min-width:1250px}}th,td{{padding:11px;border-bottom:1px solid #292929;text-align:left}}
-th{{color:#888;font-size:11px;text-transform:uppercase}}button,select,input,textarea{{border:0;border-radius:9px;padding:9px 10px;background:#181818;color:#fff}}
-button{{cursor:pointer}}a{{color:#fff}}.link{{text-decoration:none;background:#222;padding:7px 9px;border-radius:8px}}
-.badge{{font-weight:700}}.muted{{color:#888}}.toolbar{{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}}
-.toolbar input{{min-width:250px}}.stats{{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}}.stat{{background:#111;border:1px solid #292929;border-radius:12px;padding:12px 15px;min-width:100px}}
-.stat span{{color:#999;font-size:12px}}.stat b{{display:block;font-size:21px;margin-top:4px}}.analytics{{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px 0}}
-.card{{background:#111;border:1px solid #292929;border-radius:14px;padding:18px}}@media(max-width:700px){{.analytics{{grid-template-columns:1fr}}}}
+*{{box-sizing:border-box}}
+body{{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0b0b0b;color:#eee;margin:0;padding:28px;min-height:100vh}}
+body>h1,body>p,body>.stats,body>.analytics,body>.toolbar,body>.wrap{{max-width:1600px;margin-left:auto;margin-right:auto}}
+h1{{letter-spacing:.08em;margin-top:0}}.wrap{{overflow-x:auto;-webkit-overflow-scrolling:touch}}
+table{{width:100%;border-collapse:collapse;min-width:1250px}}th,td{{padding:11px;border-bottom:1px solid #292929;text-align:left;vertical-align:top}}
+th{{color:#888;font-size:11px;text-transform:uppercase;white-space:nowrap}}
+button,select,input,textarea{{border:0;border-radius:9px;padding:10px 11px;background:#181818;color:#fff;font:inherit}}
+button{{cursor:pointer}}a{{color:#fff}}.link{{text-decoration:none;background:#222;padding:7px 9px;border-radius:8px;display:inline-block}}
+.badge{{font-weight:700}}.muted{{color:#888}}.toolbar{{display:flex;gap:10px;flex-wrap:wrap;margin:18px auto}}
+.toolbar input{{min-width:280px;flex:1}}.toolbar select{{min-width:170px}}
+.stats{{display:grid;grid-template-columns:repeat(8,minmax(110px,1fr));gap:10px;margin-top:18px;margin-bottom:18px}}
+.stat{{background:#111;border:1px solid #292929;border-radius:12px;padding:12px 15px;min-width:0}}
+.stat span{{color:#999;font-size:12px}}.stat b{{display:block;font-size:21px;margin-top:4px}}.analytics{{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:18px auto}}
+.card{{background:#111;border:1px solid #292929;border-radius:14px;padding:18px}}
+.analytics table{{min-width:0}}
+
+@media(max-width:1100px){{
+  body{{padding:20px}}
+  .stats{{grid-template-columns:repeat(4,1fr)}}
+}}
+
+@media(max-width:700px){{
+  body{{padding:14px 12px;font-size:14px}}
+  h1{{font-size:25px;margin-bottom:6px}}
+  .stats{{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}}
+  .stat{{padding:10px 12px}}.stat b{{font-size:19px}}
+  .analytics{{grid-template-columns:1fr;gap:12px;margin:12px auto}}
+  .card{{padding:14px;border-radius:12px}}
+  .toolbar{{display:grid;grid-template-columns:1fr;gap:8px;margin:12px auto}}
+  .toolbar input,.toolbar select{{width:100%;min-width:0}}
+  .wrap{{overflow:visible}}
+  #applications{{min-width:0;width:100%}}
+  #applications thead{{display:none}}
+  #applications tbody,#applications tr,#applications td{{display:block;width:100%}}
+  #applications tr{{background:#111;border:1px solid #292929;border-radius:12px;margin-bottom:10px;padding:8px}}
+  #applications td{{border:0;border-bottom:1px solid #242424;padding:8px 6px;min-height:36px}}
+  #applications td:last-child{{border-bottom:0}}
+  #applications td::before{{display:block;color:#777;font-size:10px;text-transform:uppercase;margin-bottom:3px}}
+  #applications td:nth-child(1)::before{{content:"ID"}}
+  #applications td:nth-child(2)::before{{content:"Имя"}}
+  #applications td:nth-child(3)::before{{content:"Страна"}}
+  #applications td:nth-child(4)::before{{content:"Языки"}}
+  #applications td:nth-child(5)::before{{content:"Опыт"}}
+  #applications td:nth-child(6)::before{{content:"График"}}
+  #applications td:nth-child(7)::before{{content:"Статус"}}
+  #applications td:nth-child(8)::before{{content:"Контакт"}}
+  #applications td:nth-child(9)::before{{content:"Карточка"}}
+  #applications .link{{width:100%;text-align:center;padding:9px}}
+  .analytics table{{min-width:0}}
+  .analytics th,.analytics td{{padding:8px}}
+}}
 </style></head><body>
 <h1>VESTHETIC <span class="muted">CRM</span></h1>
 <p class="muted">Recruitment pipeline • 1 manager</p>
@@ -635,13 +678,28 @@ async def admin_application_detail(app_id: int, credentials: HTTPBasicCredential
 <html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Заявка #{app_id} — VESTHETIC CRM</title>
 <style>
-body{{font-family:system-ui;background:#0b0b0b;color:#eee;margin:0;padding:22px;max-width:1150px;margin:auto}}
+*{{box-sizing:border-box}}
+body{{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0b0b0b;color:#eee;margin:0 auto;padding:28px;max-width:1200px}}
 a{{color:#fff}}.muted{{color:#888}}.card{{background:#111;border:1px solid #292929;border-radius:14px;padding:20px;margin:18px 0}}
-.grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}}.item{{border-bottom:1px solid #292929;padding:10px 0}}
-.label{{display:block;color:#888;font-size:11px;text-transform:uppercase;margin-bottom:4px}}button{{border:0;border-radius:8px;padding:9px 10px;margin:4px;cursor:pointer;background:#222;color:#fff}}
-textarea{{width:100%;box-sizing:border-box;min-height:130px;border:0;border-radius:10px;padding:12px;background:#181818;color:#fff}}
-table{{width:100%;border-collapse:collapse}}th,td{{padding:10px;border-bottom:1px solid #292929;text-align:left}}
-.notes{{white-space:pre-wrap;background:#0d0d0d;border-radius:10px;padding:12px;margin-bottom:12px}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}}.item{{border-bottom:1px solid #292929;padding:10px 0;overflow-wrap:anywhere}}
+.label{{display:block;color:#888;font-size:11px;text-transform:uppercase;margin-bottom:4px}}
+button{{border:0;border-radius:8px;padding:10px 12px;margin:4px;cursor:pointer;background:#222;color:#fff;font:inherit}}
+textarea{{width:100%;box-sizing:border-box;min-height:130px;border:0;border-radius:10px;padding:12px;background:#181818;color:#fff;font:inherit;resize:vertical}}
+table{{width:100%;border-collapse:collapse}}th,td{{padding:10px;border-bottom:1px solid #292929;text-align:left;vertical-align:top}}
+.notes{{white-space:pre-wrap;background:#0d0d0d;border-radius:10px;padding:12px;margin-bottom:12px;overflow-wrap:anywhere}}
+
+@media(max-width:700px){{
+  body{{padding:14px 12px;font-size:14px}}
+  h1{{font-size:24px}}
+  .card{{padding:14px;margin:12px 0;border-radius:12px}}
+  .grid{{grid-template-columns:1fr;gap:0}}
+  .item{{padding:9px 0}}
+  .funnel{{display:grid;grid-template-columns:1fr 1fr;gap:6px}}
+  .funnel button{{margin:0;width:100%;min-height:44px}}
+  .notes{{font-size:13px}}
+  .history{{overflow-x:auto;-webkit-overflow-scrolling:touch}}
+  .history table{{min-width:560px}}
+}}
 </style></head><body>
 <p><a href="/admin">← К заявкам</a></p><h1>Заявка #{app_id}</h1>
 <div class="card"><div class="grid">
@@ -661,7 +719,7 @@ table{{width:100%;border-collapse:collapse}}th,td{{padding:10px;border-bottom:1p
 <div class="item"><span class="label">Статус</span><b>{status_label(a.get("status","new"))}</b></div>
 </div></div>
 
-<div class="card"><h2>Воронка</h2><form method="post" action="/admin/status"><input type="hidden" name="id" value="{app_id}">{buttons}</form></div>
+<div class="card"><h2>Воронка</h2><form class="funnel" method="post" action="/admin/status"><input type="hidden" name="id" value="{app_id}">{buttons}</form></div>
 
 <div class="card"><h2>Внутренние заметки</h2>
 <div class="notes">{notes or 'Пока нет заметок.'}</div>
@@ -669,7 +727,7 @@ table{{width:100%;border-collapse:collapse}}th,td{{padding:10px;border-bottom:1p
 <textarea name="note" placeholder="Например: опыт 2 года, ждём документы, договорились на интервью..."></textarea>
 <br><button type="submit">＋ Добавить заметку</button></form></div>
 
-<div class="card"><h2>История статусов</h2><div style="overflow:auto"><table>
+<div class="card"><h2>История статусов</h2><div class="history"><table>
 <thead><tr><th>Дата</th><th>Было</th><th>Стало</th><th>Изменил</th></tr></thead><tbody>{history_rows}</tbody></table></div></div>
 </body></html>""")
 
