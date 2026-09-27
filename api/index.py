@@ -778,19 +778,31 @@ async def admin_dashboard(credentials: HTTPBasicCredentials = __import__("fastap
 async def admin_status(request: Request, credentials: HTTPBasicCredentials = __import__("fastapi").Depends(security)):
     if not require_admin(credentials):
         return PlainTextResponse("Unauthorized", status_code=401, headers={"WWW-Authenticate": "Basic"})
-    form = await request.form()
+
     try:
-        app_id = int(form.get("id"))
-    except (TypeError, ValueError):
-        return PlainTextResponse("Invalid application ID", status_code=400)
-    status = str(form.get("status") or "")
-    if status not in ("accept","progress","reject"):
-        return PlainTextResponse("Invalid status", status_code=400)
-    updated = update_application_status(app_id, status)
-    if updated is None:
-        return PlainTextResponse("Application not found or update failed", status_code=404)
-    notify_candidate(app_id, updated, status)
-    return RedirectResponse("/admin", status_code=303)
+        raw = await request.body()
+        form = urllib.parse.parse_qs(raw.decode("utf-8"), keep_blank_values=True)
+        app_id_raw = (form.get("id") or [""])[0]
+        status = (form.get("status") or [""])[0]
+
+        try:
+            app_id = int(app_id_raw)
+        except (TypeError, ValueError):
+            return PlainTextResponse("Invalid application ID", status_code=400)
+
+        if status not in ("accept", "progress", "reject"):
+            return PlainTextResponse("Invalid status", status_code=400)
+
+        updated = update_application_status(app_id, status)
+        if updated is None:
+            return PlainTextResponse("Application not found or update failed", status_code=404)
+
+        notify_candidate(app_id, updated, status)
+        return RedirectResponse("/admin", status_code=303)
+
+    except Exception as exc:
+        print("Admin status error:", repr(exc))
+        return PlainTextResponse(f"Admin status error: {exc}", status_code=500)
 
 
 @app.get("/api")
