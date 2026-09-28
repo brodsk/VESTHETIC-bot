@@ -153,6 +153,28 @@ def notify_candidate(app_data, action):
     }
     send(chat,messages.get(lang,messages["en"])[action],kb_main(lang))
 
+def notify_candidate_status(app_data, status):
+    chat=app_data.get("telegram_chat_id")
+    if not chat:
+        return
+    user=user_get(chat, app_data.get("telegram_username"))
+    lang=user.get("lang") or "en"
+    status_names={
+        "ru":{"new":"⚪ Новая","progress":"🟡 В работе","contacted":"💬 Связались","interview":"🎙 Интервью","registration":"📝 Регистрация","active":"🟢 Активна","reject":"🔴 Отклонена"},
+        "en":{"new":"⚪ New","progress":"🟡 In progress","contacted":"💬 Contacted","interview":"🎙 Interview","registration":"📝 Registration","active":"🟢 Active","reject":"🔴 Declined"},
+        "sk":{"new":"⚪ Nová","progress":"🟡 V procese","contacted":"💬 Kontaktovaný","interview":"🎙 Pohovor","registration":"📝 Registrácia","active":"🟢 Aktívna","reject":"🔴 Zamietnutá"},
+        "ua":{"new":"⚪ Нова","progress":"🟡 В роботі","contacted":"💬 Зв’язалися","interview":"🎙 Співбесіда","registration":"📝 Реєстрація","active":"🟢 Активна","reject":"🔴 Відхилена"}
+    }
+    names=status_names.get(lang,status_names["en"])
+    label=names.get(status,status)
+    messages={
+        "ru":f"<b>Статус вашей заявки изменён</b>\n\nНовый статус: <b>{label}</b>",
+        "en":f"<b>Your application status has changed</b>\n\nNew status: <b>{label}</b>",
+        "sk":f"<b>Stav vašej žiadosti sa zmenil</b>\n\nNový stav: <b>{label}</b>",
+        "ua":f"<b>Статус вашої заявки змінено</b>\n\nНовий статус: <b>{label}</b>"
+    }
+    send(chat,messages.get(lang,messages["en"]),kb_main(lang))
+
 def application_create(chat,username,d):
     rows=sb("POST","applications",{"telegram_chat_id":chat,"telegram_username":username,
         "name":d.get("name"),"age_confirmed":True,"country":d.get("country"),
@@ -312,7 +334,12 @@ async def status(request:Request,c:HTTPBasicCredentials=Depends(security)):
     if not auth(c): return PlainTextResponse("Нет доступа",401)
     f=await form(request); i=int(f.get("id",["0"])[0]); s=f.get("status",[""])[0]
     if s not in STATUSES: return PlainTextResponse("Недопустимый статус",400)
+    before=app_get(i)
     r=sb("PATCH","applications",{"status":s,"status_changed_by_telegram_id":MANAGER_ID},{"id":f"eq.{i}","select":"*"})
+    if r:
+        after=r[0] if isinstance(r,list) and r else (app_get(i) or before)
+        if before and before.get("status") != s:
+            notify_candidate_status(after, s)
     return RedirectResponse(f"/admin/application/{i}",303) if r else PlainTextResponse("Ошибка обновления",500)
 
 @app.post("/admin/delete")
