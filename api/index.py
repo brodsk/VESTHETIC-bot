@@ -28,22 +28,22 @@ LABELS = {
 TEXT = {
     "ru": {
         "welcome":"<b>VESTHETIC | Digital Talent Agency</b>\n\nVESTHETIC помогает совершеннолетним онлайн-креаторам развивать карьеру на международных платформах. Мы берём на себя организационную часть, коммуникацию и сопровождение, чтобы creator мог сосредоточиться на своей работе.\n\n<b>18+ only • Voluntary • Global</b>\n\nУчастие добровольное. Условия и формат сотрудничества обсуждаются индивидуально после рассмотрения заявки.",        "about":"<b>VESTHETIC</b>\n\nVESTHETIC — Digital Talent Agency для взрослых онлайн-креаторов, которые хотят работать системно и развиваться на международном рынке.\n\nМы помогаем с организацией рабочего процесса, коммуникацией и сопровождением. Конкретный формат работы зависит от платформ, задач и договорённостей с creator.\n\n<b>Модель сотрудничества:</b> 75% creator / 25% VESTHETIC.\n\nНаша цель — выстроить понятный и профессиональный процесс, в котором creator понимает условия, формат работы и дальнейшие шаги.",        "terms":"<b>Условия сотрудничества</b>\n\n<b>Возраст</b>\nК сотрудничеству допускаются только совершеннолетние — 18+.\n\n<b>Добровольность</b>\nУчастие добровольное. Вы сами принимаете решение о начале и продолжении сотрудничества.\n\n<b>Доход</b>\nБазовая модель распределения: 75% дохода получает creator, 25% — VESTHETIC. Конкретные условия могут обсуждаться до начала сотрудничества.\n\n<b>Формат работы</b>\nРабота может выполняться удалённо. График и рабочие условия согласовываются индивидуально.\n\n<b>Конфиденциальность</b>\nНе отправляйте документы, банковские данные, пароли или другие чувствительные данные через Telegram. Если такие данные понадобятся на официальном этапе оформления, менеджер отдельно объяснит безопасный порядок их передачи.",        "faq":"<b>FAQ</b>\n\n<b>Кто может подать заявку?</b>\nТолько совершеннолетние — 18+.\n\n<b>Нужен ли опыт?</b>\nНет. Опыт работы на подобных платформах не обязателен.\n\n<b>Где можно работать?</b>\nРаботать можно из дома или из другого удобного для вас места.\n\n<b>Какое оборудование нужно?</b>\nНа старте достаточно телефона или ПК. Дополнительное оборудование зависит от выбранного формата работы.\n\n<b>Какой график?</b>\nГрафик согласовывается индивидуально с учётом вашей доступности.\n\n<b>Как распределяется доход?</b>\n75% получает creator, 25% — VESTHETIC.\n\n<b>Есть ли обучение?</b>\nМенеджер расскажет о процессе и следующих шагах после рассмотрения заявки.\n\n<b>Как подать заявку?</b>\nНажмите «Подать заявку» в меню и заполните короткую анкету.\n\n<b>Что происходит после заявки?</b>\nЗаявку рассматривает менеджер VESTHETIC, после чего связывается с вами.\n\n<b>Безопасны ли мои данные?</b>\nНе отправляйте документы или банковские данные через Telegram.\n\nЕсли остались вопросы — свяжитесь с менеджером VESTHETIC.",        "apply":"<b>Заявка в VESTHETIC</b>\n\nЗаполнение анкеты займёт несколько минут. Нам нужна базовая информация о вас, вашем опыте и доступности, чтобы менеджер мог оценить подходящий формат сотрудничества.\n\nПеред началом подтвердите, что вам уже исполнилось 18 лет и участие добровольное.",        "age":"Вам уже исполнилось 18 лет?",
-        "name":"<b>1/8 — Имя</b>\n\nКак вас зовут или какой рабочий псевдоним вы хотели бы использовать?",        "country":"<b>2/8 — Страна</b>\n\nВ какой стране вы сейчас находитесь? Укажите страну проживания или фактического нахождения.",        "languages":"<b>3/8 — Языки</b>\n\nКакими языками вы владеете и на каком уровне? Например: русский — свободно, английский — B2.",        "experience":"<b>4/8 — Опыт</b>\n\nЕсть ли у вас опыт работы на онлайн-платформах, создания контента, стриминга или другой похожей деятельности? Если опыта нет — так и напишите.",        "equipment":"<b>5/8 — Оборудование</b>\n\nКакое оборудование у вас есть? Укажите телефон, ПК или ноутбук, камеру, микрофон, освещение и другое оборудование.",        "schedule":"<b>6/8 — График</b>\n\nСколько времени вы реально готовы уделять работе? Укажите примерное количество часов в день или неделю и удобное время.",        "contact":"<b>7/8 — Контакт</b>\n\nУкажите Telegram-контакт, по которому менеджер сможет связаться с вами. Можно отправить @username.",        "source":"<b>8/8 — Источник</b>\n\nГде вы впервые увидели VESTHETIC: Telegram, Instagram, TikTok, рекомендация, поиск или другой источник?",        "thanks":"<b>Заявка отправлена ✅</b>\n\nСпасибо за интерес к VESTHETIC. Менеджер рассмотрит вашу заявку и свяжется с вами, если будет подходящий формат сотрудничества.\n\nСледите за сообщениями в Telegram.",        "no":"<b>VESTHETIC — 18+</b>\n\nМы рассматриваем заявки только от совершеннолетних. Если вам ещё нет 18 лет, подать заявку сейчас нельзя.",        "manager":"<b>Менеджер VESTHETIC</b>\n\nЕсли у вас есть вопрос до подачи заявки или нужна дополнительная информация, свяжитесь с менеджером.\n\n@VESTHETIC_manager",        "language_prompt":"Выберите язык:",
+        "name":"<b>1/8 — Имя</b>\n\nКак вас зовут или какой рабочий псевдоним вы хотели бы использовать?",        "country":"<b>2/8 — Страна</b>\n\nВ какой стране вы сейчас находитесь? Укажите страну проживания или фактического нахождения.",        "languages":"<b>3/8 — Языки</b>\n\nКакими языками вы владеете и на каком уровне? Например: русский — свободно, английский — B2.",        "experience":"<b>4/8 — Опыт</b>\n\nЕсть ли у вас опыт работы на онлайн-платформах, создания контента, стриминга или другой похожей деятельности? Если опыта нет — так и напишите.",        "equipment":"<b>5/8 — Оборудование</b>\n\nКакое оборудование у вас есть? Укажите телефон, ПК или ноутбук, камеру, микрофон, освещение и другое оборудование.",        "schedule":"<b>6/8 — График</b>\n\nСколько времени вы реально готовы уделять работе? Укажите примерное количество часов в день или неделю и удобное время.",        "contact":"<b>7/8 — Контакт</b>\n\nНажмите кнопку ниже и поделитесь своим Telegram-контактом. Это нужно, чтобы менеджер мог быстро связаться с вами.",        "source":"<b>8/8 — Источник</b>\n\nГде вы впервые увидели VESTHETIC: Telegram, Instagram, TikTok, рекомендация, поиск или другой источник?",        "thanks":"<b>Заявка отправлена ✅</b>\n\nСпасибо за интерес к VESTHETIC. Менеджер рассмотрит вашу заявку и свяжется с вами, если будет подходящий формат сотрудничества.\n\nСледите за сообщениями в Telegram.",        "no":"<b>VESTHETIC — 18+</b>\n\nМы рассматриваем заявки только от совершеннолетних. Если вам ещё нет 18 лет, подать заявку сейчас нельзя.",        "manager":"<b>Менеджер VESTHETIC</b>\n\nЕсли у вас есть вопрос до подачи заявки или нужна дополнительная информация, свяжитесь с менеджером.\n\n@VESTHETIC_manager",        "language_prompt":"Выберите язык:",
         "save_error":"Не удалось сохранить заявку. Попробуйте ещё раз."
     },
     "en": {
         "welcome":"<b>VESTHETIC | Digital Talent Agency</b>\n\nVESTHETIC helps adult online creators build and develop their careers on international platforms. We handle the organizational side, communication and support so creators can focus on their work.\n\n<b>18+ only • Voluntary • Global</b>\n\nParticipation is voluntary. The cooperation terms and format are discussed individually after an application is reviewed.",        "about":"<b>VESTHETIC</b>\n\nVESTHETIC is a Digital Talent Agency for adult online creators who want to work professionally and develop in the international market.\n\nWe provide support with organization, workflow, communication and ongoing coordination. The exact format depends on the platforms, tasks and individual agreement with the creator.\n\n<b>Cooperation model:</b> 75% creator / 25% VESTHETIC.\n\nOur goal is to create a clear and professional process where every creator understands the terms, workflow and next steps.",        "terms":"<b>Cooperation Terms</b>\n\n<b>Age</b>\nOnly adults aged 18+ can apply.\n\n<b>Voluntary participation</b>\nParticipation is voluntary. You decide whether to start and continue the cooperation.\n\n<b>Income</b>\nThe standard revenue model is 75% to the creator and 25% to VESTHETIC. Specific terms can be discussed before cooperation begins.\n\n<b>Work format</b>\nWork can be performed remotely. Schedule and working conditions are agreed individually.\n\n<b>Privacy</b>\nDo not send documents, banking details, passwords or other sensitive information through Telegram. If such information is required during official onboarding, a manager will explain the secure way to provide it.",        "faq":"<b>FAQ</b>\n\n<b>Who can apply?</b>\nAdults only — 18+.\n\n<b>Do I need experience?</b>\nNo. Previous experience on similar platforms is not required.\n\n<b>Where can I work?</b>\nYou can work from home or another location that is convenient for you.\n\n<b>What equipment do I need?</b>\nA phone or PC is enough to get started. Additional equipment depends on the chosen work format.\n\n<b>What is the schedule?</b>\nYour schedule is agreed individually based on your availability.\n\n<b>How is the income split?</b>\n75% goes to the creator, 25% to VESTHETIC.\n\n<b>Is training provided?</b>\nA manager will explain the process and next steps after reviewing your application.\n\n<b>How do I apply?</b>\nTap «Apply» in the menu and complete the short application.\n\n<b>What happens after I apply?</b>\nA VESTHETIC manager reviews your application and then contacts you.\n\n<b>Are my data safe?</b>\nDo not send documents or banking details through Telegram.\n\nIf you have more questions, contact the VESTHETIC manager.",        "apply":"<b>VESTHETIC Application</b>\n\nThe application takes a few minutes. We ask for basic information about you, your experience and availability so a manager can assess a suitable cooperation format.\n\nBefore starting, confirm that you are 18 or older and that participation is voluntary.",        "age":"Are you 18 or older?",
-        "name":"<b>1/8 — Name</b>\n\nWhat is your name or preferred working pseudonym?",        "country":"<b>2/8 — Country</b>\n\nWhich country are you currently in? Please provide your country of residence or current location.",        "languages":"<b>3/8 — Languages</b>\n\nWhich languages do you speak and at what level? For example: Russian — fluent, English — B2.",        "experience":"<b>4/8 — Experience</b>\n\nDo you have experience with online platforms, content creation, streaming or similar work? If not, simply say so.",        "equipment":"<b>5/8 — Equipment</b>\n\nWhat equipment do you have? Please mention your phone, PC or laptop, camera, microphone, lighting and other equipment.",        "schedule":"<b>6/8 — Schedule</b>\n\nHow much time can you realistically dedicate to the work? Give an approximate number of hours per day or week and your preferred hours.",        "contact":"<b>7/8 — Contact</b>\n\nProvide a Telegram contact where a manager can reach you. You can send your @username.",        "source":"<b>8/8 — Source</b>\n\nWhere did you first discover VESTHETIC: Telegram, Instagram, TikTok, a recommendation, search or another source?",        "thanks":"<b>Application submitted ✅</b>\n\nThank you for your interest in VESTHETIC. A manager will review your application and contact you if there is a suitable cooperation format.\n\nPlease watch your Telegram messages.",        "no":"<b>VESTHETIC — 18+</b>\n\nWe only review applications from adults. If you are under 18, you cannot apply at this time.",        "manager":"<b>VESTHETIC Manager</b>\n\nIf you have a question before applying or need additional information, contact the manager.\n\n@VESTHETIC_manager",        "language_prompt":"Choose your language:",
+        "name":"<b>1/8 — Name</b>\n\nWhat is your name or preferred working pseudonym?",        "country":"<b>2/8 — Country</b>\n\nWhich country are you currently in? Please provide your country of residence or current location.",        "languages":"<b>3/8 — Languages</b>\n\nWhich languages do you speak and at what level? For example: Russian — fluent, English — B2.",        "experience":"<b>4/8 — Experience</b>\n\nDo you have experience with online platforms, content creation, streaming or similar work? If not, simply say so.",        "equipment":"<b>5/8 — Equipment</b>\n\nWhat equipment do you have? Please mention your phone, PC or laptop, camera, microphone, lighting and other equipment.",        "schedule":"<b>6/8 — Schedule</b>\n\nHow much time can you realistically dedicate to the work? Give an approximate number of hours per day or week and your preferred hours.",        "contact":"<b>7/8 — Contact</b>\n\nTap the button below and share your Telegram contact so a manager can reach you quickly.",        "source":"<b>8/8 — Source</b>\n\nWhere did you first discover VESTHETIC: Telegram, Instagram, TikTok, a recommendation, search or another source?",        "thanks":"<b>Application submitted ✅</b>\n\nThank you for your interest in VESTHETIC. A manager will review your application and contact you if there is a suitable cooperation format.\n\nPlease watch your Telegram messages.",        "no":"<b>VESTHETIC — 18+</b>\n\nWe only review applications from adults. If you are under 18, you cannot apply at this time.",        "manager":"<b>VESTHETIC Manager</b>\n\nIf you have a question before applying or need additional information, contact the manager.\n\n@VESTHETIC_manager",        "language_prompt":"Choose your language:",
         "save_error":"Could not save the application. Please try again."
     },
     "sk": {
         "welcome":"<b>VESTHETIC | Digital Talent Agency</b>\n\nVESTHETIC pomáha dospelým online tvorcom budovať a rozvíjať kariéru na medzinárodných platformách. Zabezpečujeme organizačnú stránku, komunikáciu a podporu, aby sa tvorca mohol sústrediť na svoju prácu.\n\n<b>Iba 18+ • Dobrovoľné • Globálne</b>\n\nÚčasť je dobrovoľná. Podmienky a forma spolupráce sa dohodnú individuálne po posúdení žiadosti.",        "about":"<b>VESTHETIC</b>\n\nVESTHETIC je Digital Talent Agency pre dospelých online tvorcov, ktorí chcú pracovať profesionálne a rozvíjať sa na medzinárodnom trhu.\n\nPomáhame s organizáciou práce, komunikáciou, pracovným procesom a priebežnou podporou. Konkrétna forma závisí od platforiem, úloh a individuálnej dohody s creatorom.\n\n<b>Model spolupráce:</b> 75 % creator / 25 % VESTHETIC.\n\nNaším cieľom je vytvoriť jasný a profesionálny proces, v ktorom creator rozumie podmienkam, spôsobu práce a ďalším krokom.",        "terms":"<b>Podmienky spolupráce</b>\n\n<b>Vek</b>\nŽiadosť môžu podať iba dospelé osoby vo veku 18+.\n\n<b>Dobrovoľnosť</b>\nÚčasť je dobrovoľná. O začatí aj pokračovaní spolupráce rozhodujete sami.\n\n<b>Príjem</b>\nZákladný model rozdelenia príjmu je 75 % pre creatora a 25 % pre VESTHETIC. Konkrétne podmienky je možné dohodnúť pred začiatkom spolupráce.\n\n<b>Forma práce</b>\nPráca môže prebiehať na diaľku. Rozvrh a pracovné podmienky sa dohodnú individuálne.\n\n<b>Ochrana údajov</b>\nNeposielajte dokumenty, bankové údaje, heslá ani iné citlivé informácie cez Telegram. Ak budú takéto údaje potrebné počas oficiálneho nástupu, manažér vám vysvetlí bezpečný spôsob ich odovzdania.",        "faq":"<b>FAQ</b>\n\n<b>Kto môže podať žiadosť?</b>\nIba dospelí — 18+.\n\n<b>Potrebujem skúsenosti?</b>\nNie. Predchádzajúce skúsenosti s podobnými platformami nie sú potrebné.\n\n<b>Kde môžem pracovať?</b>\nPracovať môžete z domu alebo z iného miesta, ktoré vám vyhovuje.\n\n<b>Aké vybavenie potrebujem?</b>\nNa začiatok stačí telefón alebo PC. Ďalšie vybavenie závisí od zvoleného formátu práce.\n\n<b>Aký je pracovný čas?</b>\nRozvrh sa dohodne individuálne podľa vašich možností.\n\n<b>Ako sa delí príjem?</b>\n75 % dostáva creator, 25 % VESTHETIC.\n\n<b>Je k dispozícii školenie?</b>\nManažér vám po posúdení žiadosti vysvetlí proces a ďalšie kroky.\n\n<b>Ako podať žiadosť?</b>\nV menu stlačte «Žiadosť» a vyplňte krátky formulár.\n\n<b>Čo sa stane po odoslaní žiadosti?</b>\nManažér VESTHETIC žiadosť posúdi a následne vás kontaktuje.\n\n<b>Sú moje údaje v bezpečí?</b>\nNeposielajte dokumenty ani bankové údaje cez Telegram.\n\nAk máte ďalšie otázky, kontaktujte manažéra VESTHETIC.",        "apply":"<b>Žiadosť do VESTHETIC</b>\n\nVyplnenie žiadosti trvá niekoľko minút. Potrebujeme základné informácie o vás, vašich skúsenostiach a dostupnosti, aby manažér mohol posúdiť vhodnú formu spolupráce.\n\nPred začiatkom potvrďte, že máte 18 rokov alebo viac a účasť je dobrovoľná.",        "age":"Máte už 18 rokov?",
-        "name":"<b>1/8 — Meno</b>\n\nAko sa voláte alebo aký pracovný pseudonym chcete používať?",        "country":"<b>2/8 — Krajina</b>\n\nV ktorej krajine sa momentálne nachádzate? Uveďte krajinu pobytu alebo aktuálne miesto.",        "languages":"<b>3/8 — Jazyky</b>\n\nAkými jazykmi hovoríte a na akej úrovni? Napríklad: ruština — plynule, angličtina — B2.",        "experience":"<b>4/8 — Skúsenosti</b>\n\nMáte skúsenosti s online platformami, tvorbou obsahu, streamovaním alebo podobnou prácou? Ak nie, jednoducho to uveďte.",        "equipment":"<b>5/8 — Vybavenie</b>\n\nAké vybavenie máte? Uveďte telefón, PC alebo notebook, kameru, mikrofón, osvetlenie a ďalšie vybavenie.",        "schedule":"<b>6/8 — Časový rozvrh</b>\n\nKoľko času môžete reálne venovať práci? Uveďte približný počet hodín denne alebo týždenne a čas, ktorý vám vyhovuje.",        "contact":"<b>7/8 — Kontakt</b>\n\nUveďte Telegram kontakt, na ktorom vás môže manažér kontaktovať. Môžete poslať svoje @username.",        "source":"<b>8/8 — Zdroj</b>\n\nKde ste prvýkrát videli VESTHETIC: Telegram, Instagram, TikTok, odporúčanie, vyhľadávanie alebo iný zdroj?",        "thanks":"<b>Žiadosť bola odoslaná ✅</b>\n\nĎakujeme za váš záujem o VESTHETIC. Manažér žiadosť posúdi a bude vás kontaktovať, ak bude k dispozícii vhodná forma spolupráce.\n\nSledujte prosím správy v Telegrame.",        "no":"<b>VESTHETIC — 18+</b>\n\nPosudzujeme iba žiadosti od plnoletých osôb. Ak ešte nemáte 18 rokov, momentálne sa nemôžete prihlásiť.",        "manager":"<b>Manažér VESTHETIC</b>\n\nAk máte otázku pred podaním žiadosti alebo potrebujete ďalšie informácie, kontaktujte manažéra.\n\n@VESTHETIC_manager",        "language_prompt":"Vyberte si jazyk:",
+        "name":"<b>1/8 — Meno</b>\n\nAko sa voláte alebo aký pracovný pseudonym chcete používať?",        "country":"<b>2/8 — Krajina</b>\n\nV ktorej krajine sa momentálne nachádzate? Uveďte krajinu pobytu alebo aktuálne miesto.",        "languages":"<b>3/8 — Jazyky</b>\n\nAkými jazykmi hovoríte a na akej úrovni? Napríklad: ruština — plynule, angličtina — B2.",        "experience":"<b>4/8 — Skúsenosti</b>\n\nMáte skúsenosti s online platformami, tvorbou obsahu, streamovaním alebo podobnou prácou? Ak nie, jednoducho to uveďte.",        "equipment":"<b>5/8 — Vybavenie</b>\n\nAké vybavenie máte? Uveďte telefón, PC alebo notebook, kameru, mikrofón, osvetlenie a ďalšie vybavenie.",        "schedule":"<b>6/8 — Časový rozvrh</b>\n\nKoľko času môžete reálne venovať práci? Uveďte približný počet hodín denne alebo týždenne a čas, ktorý vám vyhovuje.",        "contact":"<b>7/8 — Kontakt</b>\n\nStlačte tlačidlo nižšie a zdieľajte svoj Telegram kontakt, aby vás manažér mohol rýchlo kontaktovať.",        "source":"<b>8/8 — Zdroj</b>\n\nKde ste prvýkrát videli VESTHETIC: Telegram, Instagram, TikTok, odporúčanie, vyhľadávanie alebo iný zdroj?",        "thanks":"<b>Žiadosť bola odoslaná ✅</b>\n\nĎakujeme za váš záujem o VESTHETIC. Manažér žiadosť posúdi a bude vás kontaktovať, ak bude k dispozícii vhodná forma spolupráce.\n\nSledujte prosím správy v Telegrame.",        "no":"<b>VESTHETIC — 18+</b>\n\nPosudzujeme iba žiadosti od plnoletých osôb. Ak ešte nemáte 18 rokov, momentálne sa nemôžete prihlásiť.",        "manager":"<b>Manažér VESTHETIC</b>\n\nAk máte otázku pred podaním žiadosti alebo potrebujete ďalšie informácie, kontaktujte manažéra.\n\n@VESTHETIC_manager",        "language_prompt":"Vyberte si jazyk:",
         "save_error":"Žiadosť sa nepodarilo uložiť. Skúste to znova."
     },
     "ua": {
         "welcome":"<b>VESTHETIC | Digital Talent Agency</b>\n\nVESTHETIC допомагає повнолітнім онлайн-креаторам будувати та розвивати кар’єру на міжнародних платформах. Ми беремо на себе організаційну частину, комунікацію та супровід, щоб creator міг зосередитися на своїй роботі.\n\n<b>Тільки 18+ • Добровільно • Глобально</b>\n\nУчасть добровільна. Умови та формат співпраці обговорюються індивідуально після розгляду заявки.",        "about":"<b>VESTHETIC</b>\n\nVESTHETIC — Digital Talent Agency для повнолітніх онлайн-креаторів, які хочуть професійно працювати та розвиватися на міжнародному ринку.\n\nМи допомагаємо з організацією роботи, комунікацією, робочим процесом і супроводом. Конкретний формат залежить від платформ, завдань та індивідуальної домовленості з creator.\n\n<b>Модель співпраці:</b> 75% creator / 25% VESTHETIC.\n\nНаша мета — створити зрозумілий і професійний процес, у якому creator розуміє умови, формат роботи та наступні кроки.",        "terms":"<b>Умови співпраці</b>\n\n<b>Вік</b>\nПодати заявку можуть лише повнолітні — 18+.\n\n<b>Добровільність</b>\nУчасть добровільна. Ви самостійно вирішуєте, чи починати та продовжувати співпрацю.\n\n<b>Дохід</b>\nБазова модель розподілу доходу: 75% отримує creator, 25% — VESTHETIC. Конкретні умови можна обговорити до початку співпраці.\n\n<b>Формат роботи</b>\nРобота може виконуватися дистанційно. Графік і робочі умови узгоджуються індивідуально.\n\n<b>Конфіденційність</b>\nНе надсилайте документи, банківські дані, паролі чи іншу конфіденційну інформацію через Telegram. Якщо такі дані знадобляться на офіційному етапі оформлення, менеджер окремо пояснить безпечний спосіб їх передачі.",        "faq":"<b>FAQ</b>\n\n<b>Хто може подати заявку?</b>\nТільки повнолітні — 18+.\n\n<b>Чи потрібен досвід?</b>\nНі. Попередній досвід роботи на подібних платформах не обов’язковий.\n\n<b>Де можна працювати?</b>\nМожна працювати з дому або з іншого зручного для вас місця.\n\n<b>Яке обладнання потрібне?</b>\nДля початку достатньо телефона або ПК. Додаткове обладнання залежить від обраного формату роботи.\n\n<b>Який графік?</b>\nГрафік узгоджується індивідуально з урахуванням вашої доступності.\n\n<b>Як розподіляється дохід?</b>\n75% отримує creator, 25% — VESTHETIC.\n\n<b>Чи є навчання?</b>\nПісля розгляду заявки менеджер пояснить процес і наступні кроки.\n\n<b>Як подати заявку?</b>\nНатисніть «Подати заявку» в меню та заповніть коротку анкету.\n\n<b>Що відбувається після подання заявки?</b>\nМенеджер VESTHETIC розгляне заявку та зв’яжеться з вами.\n\n<b>Чи безпечні мої дані?</b>\nНе надсилайте документи або банківські дані через Telegram.\n\nЯкщо у вас залишилися питання — зв’яжіться з менеджером VESTHETIC.",        "apply":"<b>Заявка до VESTHETIC</b>\n\nЗаповнення анкети займе кілька хвилин. Нам потрібна базова інформація про вас, ваш досвід і доступність, щоб менеджер міг оцінити відповідний формат співпраці.\n\nПеред початком підтвердьте, що вам уже виповнилося 18 років і участь добровільна.",        "age":"Вам уже виповнилося 18 років?",
-        "name":"<b>1/8 — Ім’я</b>\n\nЯк вас звати або який робочий псевдонім ви хотіли б використовувати?",        "country":"<b>2/8 — Країна</b>\n\nУ якій країні ви зараз перебуваєте? Вкажіть країну проживання або фактичного перебування.",        "languages":"<b>3/8 — Мови</b>\n\nЯкими мовами ви володієте та на якому рівні? Наприклад: російська — вільно, англійська — B2.",        "experience":"<b>4/8 — Досвід</b>\n\nЧи маєте досвід роботи на онлайн-платформах, створення контенту, стримінгу або іншої подібної роботи? Якщо ні — просто напишіть про це.",        "equipment":"<b>5/8 — Обладнання</b>\n\nЯке обладнання у вас є? Вкажіть телефон, ПК або ноутбук, камеру, мікрофон, освітлення та інше обладнання.",        "schedule":"<b>6/8 — Графік</b>\n\nСкільки часу ви реально готові приділяти роботі? Вкажіть приблизну кількість годин на день або тиждень та зручний для вас час.",        "contact":"<b>7/8 — Контакт</b>\n\nВкажіть Telegram-контакт, за яким менеджер зможе з вами зв’язатися. Можна надіслати @username.",        "source":"<b>8/8 — Джерело</b>\n\nДе ви вперше побачили VESTHETIC: Telegram, Instagram, TikTok, рекомендація, пошук або інше джерело?",        "thanks":"<b>Заявку надіслано ✅</b>\n\nДякуємо за інтерес до VESTHETIC. Менеджер розгляне вашу заявку та зв’яжеться з вами, якщо буде відповідний формат співпраці.\n\nБудь ласка, стежте за повідомленнями в Telegram.",        "no":"<b>VESTHETIC — 18+</b>\n\nМи розглядаємо лише заявки від повнолітніх. Якщо вам ще немає 18 років, наразі подати заявку неможливо.",        "manager":"<b>Менеджер VESTHETIC</b>\n\nЯкщо у вас є запитання перед поданням заявки або потрібна додаткова інформація, зв’яжіться з менеджером.\n\n@VESTHETIC_manager",        "language_prompt":"Оберіть мову:",
+        "name":"<b>1/8 — Ім’я</b>\n\nЯк вас звати або який робочий псевдонім ви хотіли б використовувати?",        "country":"<b>2/8 — Країна</b>\n\nУ якій країні ви зараз перебуваєте? Вкажіть країну проживання або фактичного перебування.",        "languages":"<b>3/8 — Мови</b>\n\nЯкими мовами ви володієте та на якому рівні? Наприклад: російська — вільно, англійська — B2.",        "experience":"<b>4/8 — Досвід</b>\n\nЧи маєте досвід роботи на онлайн-платформах, створення контенту, стримінгу або іншої подібної роботи? Якщо ні — просто напишіть про це.",        "equipment":"<b>5/8 — Обладнання</b>\n\nЯке обладнання у вас є? Вкажіть телефон, ПК або ноутбук, камеру, мікрофон, освітлення та інше обладнання.",        "schedule":"<b>6/8 — Графік</b>\n\nСкільки часу ви реально готові приділяти роботі? Вкажіть приблизну кількість годин на день або тиждень та зручний для вас час.",        "contact":"<b>7/8 — Контакт</b>\n\nНатисніть кнопку нижче та поділіться своїм Telegram-контактом, щоб менеджер міг швидко з вами зв’язатися.",        "source":"<b>8/8 — Джерело</b>\n\nДе ви вперше побачили VESTHETIC: Telegram, Instagram, TikTok, рекомендація, пошук або інше джерело?",        "thanks":"<b>Заявку надіслано ✅</b>\n\nДякуємо за інтерес до VESTHETIC. Менеджер розгляне вашу заявку та зв’яжеться з вами, якщо буде відповідний формат співпраці.\n\nБудь ласка, стежте за повідомленнями в Telegram.",        "no":"<b>VESTHETIC — 18+</b>\n\nМи розглядаємо лише заявки від повнолітніх. Якщо вам ще немає 18 років, наразі подати заявку неможливо.",        "manager":"<b>Менеджер VESTHETIC</b>\n\nЯкщо у вас є запитання перед поданням заявки або потрібна додаткова інформація, зв’яжіться з менеджером.\n\n@VESTHETIC_manager",        "language_prompt":"Оберіть мову:",
         "save_error":"Не вдалося зберегти заявку. Спробуйте ще раз."
     },
 }
@@ -90,12 +90,19 @@ def kb_lang():
         [{"text":"🇸🇰 Slovenčina","callback_data":"lang_sk"},{"text":"🇬🇧 English","callback_data":"lang_en"}]]}
 
 def kb_main(lang):
-    labels={"ru":["ℹ️ О VESTHETIC","📋 Условия","❓ FAQ","🚀 Подать заявку","👤 Менеджер","🌐 Язык"],
-            "en":["ℹ️ About","📋 Terms","❓ FAQ","🚀 Apply","👤 Manager","🌐 Language"],
-            "sk":["ℹ️ O VESTHETIC","📋 Podmienky","❓ FAQ","🚀 Žiadosť","👤 Manažér","🌐 Jazyk"],
-            "ua":["ℹ️ Про VESTHETIC","📋 Умови","❓ FAQ","🚀 Подати заявку","👤 Менеджер","🌐 Мова"]}
-    acts=["about","terms","faq","apply","manager","language"]
+    labels={"ru":["ℹ️ О VESTHETIC","📋 Условия","❓ FAQ","🚀 Подать заявку","📌 Моя заявка","👤 Менеджер","🌐 Язык"],
+            "en":["ℹ️ About","📋 Terms","❓ FAQ","🚀 Apply","📌 My application","👤 Manager","🌐 Language"],
+            "sk":["ℹ️ O VESTHETIC","📋 Podmienky","❓ FAQ","🚀 Žiadosť","📌 Moja žiadosť","👤 Manažér","🌐 Jazyk"],
+            "ua":["ℹ️ Про VESTHETIC","📋 Умови","❓ FAQ","🚀 Подати заявку","📌 Моя заявка","👤 Менеджер","🌐 Мова"]}
+    acts=["about","terms","faq","apply","my_application","manager","language"]
     return {"inline_keyboard":[[{"text":a,"callback_data":b}] for a,b in zip(labels.get(lang,labels["en"]),acts)]}
+
+def contact_request_markup(lang):
+    labels={"ru":"📱 Поделиться контактом","en":"📱 Share contact","sk":"📱 Zdieľať kontakt","ua":"📱 Поділитися контактом"}
+    return {"keyboard":[[{"text":labels.get(lang,labels["en"]),"request_contact":True}]],"resize_keyboard":True,"one_time_keyboard":True}
+
+def remove_reply_keyboard():
+    return {"remove_keyboard":True}
 
 def user_get(chat,username):
     rows=sb("GET","bot_users",query={"telegram_chat_id":f"eq.{chat}","select":"*","limit":"1"})
@@ -117,11 +124,18 @@ def user_save(chat,username,u):
     return sb("POST","bot_users",payload)
 
 def manager_markup(i):
-    return {"inline_keyboard":[[
-        {"text":"🟢 Принять","callback_data":f"mgr_accept_{i}"},
-        {"text":"🟡 В работе","callback_data":f"mgr_progress_{i}"},
-        {"text":"🔴 Отклонить","callback_data":f"mgr_reject_{i}"}
-    ]]}
+    return {"inline_keyboard":[
+        [
+            {"text":"🟢 Активна","callback_data":f"mgr_status_active_{i}"},
+            {"text":"🟡 В работе","callback_data":f"mgr_status_progress_{i}"},
+            {"text":"💬 Связались","callback_data":f"mgr_status_contacted_{i}"}
+        ],
+        [
+            {"text":"🎙 Интервью","callback_data":f"mgr_status_interview_{i}"},
+            {"text":"📝 Регистрация","callback_data":f"mgr_status_registration_{i}"},
+            {"text":"🔴 Отклонить","callback_data":f"mgr_status_reject_{i}"}
+        ]
+    ]}
 
 def notify_candidate(app_data, action):
     chat=app_data.get("telegram_chat_id")
@@ -175,6 +189,30 @@ def notify_candidate_status(app_data, status):
     }
     send(chat,messages.get(lang,messages["en"]),kb_main(lang))
 
+def notify_manager_status(app_data, status):
+    if not app_data:
+        return
+    i=app_data.get("id")
+    chat=app_data.get("telegram_chat_id")
+    username=app_data.get("telegram_username")
+    names={"new":"⚪ Новая","progress":"🟡 В работе","contacted":"💬 Связались","interview":"🎙 Интервью","registration":"📝 Регистрация","active":"🟢 Активна","reject":"🔴 Отклонена"}
+    label=names.get(status,status)
+    msg=(
+        f"<b>Статус заявки #{esc(i)} изменён</b>\n\n"
+        f"<b>Имя:</b> {esc(app_data.get('name'))}\n"
+        f"<b>Статус:</b> {esc(label)}\n"
+        f"<b>Телефон:</b> {esc(app_data.get('contact'))}\n"
+        f"<b>Telegram:</b> {esc('@'+username if username else 'без @username')}"
+    )
+    markup={"inline_keyboard":[[{"text":"💬 Открыть Telegram","url":f"tg://user?id={chat}"}]]} if chat else None
+    send(MANAGER_ID,msg,markup)
+
+def send_contact(chat,phone,first_name,last_name=""):
+    d={"chat_id":chat,"phone_number":phone,"first_name":first_name or "VESTHETIC"}
+    if last_name:
+        d["last_name"]=last_name
+    return tg("sendContact",d)
+
 def application_create(chat,username,d):
     rows=sb("POST","applications",{"telegram_chat_id":chat,"telegram_username":username,
         "name":d.get("name"),"age_confirmed":True,"country":d.get("country"),
@@ -192,11 +230,17 @@ def application_create(chat,username,d):
         f"<b>Опыт:</b> {esc(d.get('experience'))}\n"
         f"<b>Оборудование:</b> {esc(d.get('equipment'))}\n"
         f"<b>График:</b> {esc(d.get('schedule'))}\n"
-        f"<b>Контакт:</b> {esc(d.get('contact'))}\n"
+        f"<b>Телефон:</b> {esc(d.get('contact'))}\n"
+        f"<b>Telegram:</b> {esc('@'+username if username else 'без @username')}\n"
         f"<b>Источник:</b> {esc(d.get('source'))}\n"
         f"<b>Заявка:</b> #{esc(a.get('id'))}"
     )
-    send(MANAGER_ID,msg,manager_markup(a.get("id")))
+    markup=manager_markup(a.get("id"))
+    if chat:
+        markup["inline_keyboard"].append([{"text":"💬 Открыть Telegram","url":f"tg://user?id={chat}"}])
+    send(MANAGER_ID,msg,markup)
+    if d.get('contact'):
+        send_contact(MANAGER_ID,d.get('contact'),d.get('name') or "Candidate")
     return a
 
 def app_get(i):
@@ -207,16 +251,62 @@ def apps():
 
 def esc(v): return html.escape(str(v if v is not None else "—"))
 
+def candidate_application(chat):
+    r=sb("GET","applications",query={"telegram_chat_id":f"eq.{chat}","select":"*","order":"created_at.desc","limit":"1"})
+    return r[0] if r else None
+
+def candidate_status_message(app_data,lang):
+    if not app_data:
+        messages={
+            "ru":"<b>Моя заявка</b>\n\nУ вас пока нет отправленной заявки.",
+            "en":"<b>My application</b>\n\nYou have not submitted an application yet.",
+            "sk":"<b>Moja žiadosť</b>\n\nZatiaľ ste neodoslali žiadosť.",
+            "ua":"<b>Моя заявка</b>\n\nВи ще не надсилали заявку."
+        }
+        return messages.get(lang,messages["en"])
+    names={
+        "ru":{"new":"⚪ Новая","progress":"🟡 В работе","contacted":"💬 Связались","interview":"🎙 Интервью","registration":"📝 Регистрация","active":"🟢 Активна","reject":"🔴 Отклонена"},
+        "en":{"new":"⚪ New","progress":"🟡 In progress","contacted":"💬 Contacted","interview":"🎙 Interview","registration":"📝 Registration","active":"🟢 Active","reject":"🔴 Declined"},
+        "sk":{"new":"⚪ Nová","progress":"🟡 V procese","contacted":"💬 Kontaktovaný","interview":"🎙 Pohovor","registration":"📝 Registrácia","active":"🟢 Aktívna","reject":"🔴 Zamietnutá"},
+        "ua":{"new":"⚪ Нова","progress":"🟡 В роботі","contacted":"💬 Зв’язалися","interview":"🎙 Співбесіда","registration":"📝 Реєстрація","active":"🟢 Активна","reject":"🔴 Відхилена"}
+    }
+    label=names.get(lang,names["en"]).get(app_data.get("status"),app_data.get("status","—"))
+    texts={
+        "ru":f"<b>Моя заявка #{esc(app_data.get('id'))}</b>\n\n<b>Статус:</b> {esc(label)}",
+        "en":f"<b>My application #{esc(app_data.get('id'))}</b>\n\n<b>Status:</b> {esc(label)}",
+        "sk":f"<b>Moja žiadosť #{esc(app_data.get('id'))}</b>\n\n<b>Stav:</b> {esc(label)}",
+        "ua":f"<b>Моя заявка #{esc(app_data.get('id'))}</b>\n\n<b>Статус:</b> {esc(label)}"
+    }
+    return texts.get(lang,texts["en"])
+
 def process_message(m):
     chat=m.get("chat",{}).get("id"); text=(m.get("text") or "").strip()
     if not chat: return
     username=m.get("chat",{}).get("username")
     u=user_get(chat,username)
     lang=u["lang"]
+    contact=m.get("contact")
     if text.startswith("/start"):
         u={"lang":lang,"state":None,"application":{}}; user_save(chat,username,u)
         send(chat,"<b>VESTHETIC</b>",kb_lang()); return
     state=u.get("state")
+    if state=="apply_contact" and contact:
+        owner_id=contact.get("user_id")
+        if owner_id is not None and str(owner_id)!=str(chat):
+            messages={
+                "ru":"Пожалуйста, отправьте именно свой Telegram-контакт через кнопку ниже.",
+                "en":"Please share your own Telegram contact using the button below.",
+                "sk":"Prosím, zdieľajte svoj vlastný Telegram kontakt pomocou tlačidla nižšie.",
+                "ua":"Будь ласка, надішліть саме свій Telegram-контакт за допомогою кнопки нижче."
+            }
+            send(chat,messages.get(lang,messages["en"]),contact_request_markup(lang)); return
+        phone=contact.get("phone_number")
+        if not phone:
+            return
+        u["application"]["contact"]=phone
+        u["state"]="apply_source"
+        user_save(chat,username,u)
+        send(chat,TEXT[lang]["source"],remove_reply_keyboard()); return
     if state and state.startswith("apply_"):
         steps=["apply_name","apply_country","apply_languages","apply_experience","apply_equipment","apply_schedule","apply_contact","apply_source"]
         key=state
@@ -235,7 +325,10 @@ def process_message(m):
             user_save(chat,username,u)
             send(chat,TEXT[lang]["thanks"] if a else TEXT[lang]["save_error"],kb_main(lang)); return
         u["state"]=steps[idx+1]; user_save(chat,username,u)
-        send(chat,TEXT[lang][steps[idx+1].replace("apply_","")]); return
+        next_key=steps[idx+1]
+        if next_key=="apply_contact":
+            send(chat,TEXT[lang]["contact"],contact_request_markup(lang)); return
+        send(chat,TEXT[lang][next_key.replace("apply_","")]); return
     if text in ("/help",):
         send(chat,TEXT[lang]["faq"],kb_main(lang))
 
@@ -251,11 +344,29 @@ def process_callback(c):
     if data=="language": edit(chat,mid,TEXT[lang]["language_prompt"],kb_lang()); answer(cid); return
     if data in ("about","terms","faq","manager"):
         edit(chat,mid,TEXT[lang][data],kb_main(lang)); answer(cid); return
+    if data=="my_application":
+        a=candidate_application(chat)
+        edit(chat,mid,candidate_status_message(a,lang),kb_main(lang)); answer(cid); return
     if data=="apply":
         u["state"]="apply_age"; u["application"]={}; user_save(chat,username,u)
         edit(chat,mid,TEXT[lang]["apply"],{"inline_keyboard":[[{"text":"18+","callback_data":"age_yes"},{"text":"Under 18","callback_data":"age_no"}]]}); answer(cid); return
     if data=="age_no":
         u["state"]=None; user_save(chat,username,u); edit(chat,mid,TEXT[lang]["no"]); answer(cid); return
+    if data.startswith("mgr_status_"):
+        parts=data.split("_")
+        if len(parts)==4 and str(parts[3]).isdigit():
+            status=parts[2]; i=int(parts[3])
+            if status in STATUSES and status!="new":
+                before=app_get(i)
+                r=sb("PATCH","applications",{"status":status,"status_changed_by_telegram_id":MANAGER_ID},{"id":f"eq.{i}","select":"*"})
+                if r:
+                    after=r[0] if isinstance(r,list) and r else (app_get(i) or before)
+                    labels={"progress":"🟡 В работе","contacted":"💬 Связались","interview":"🎙 Интервью","registration":"📝 Регистрация","active":"🟢 Активна","reject":"🔴 Отклонена"}
+                    answer(cid,labels.get(status,status))
+                    edit(chat,mid,f"<b>Статус заявки #{i}</b>\n\n{esc(labels.get(status,status))}",manager_markup(i))
+                    if before and before.get("status") != status and after:
+                        notify_candidate_status(after,status)
+        return
     if data.startswith("mgr_"):
         parts=data.split("_")
         if len(parts)==3 and str(parts[2]).isdigit():
@@ -340,6 +451,7 @@ async def status(request:Request,c:HTTPBasicCredentials=Depends(security)):
         after=r[0] if isinstance(r,list) and r else (app_get(i) or before)
         if before and before.get("status") != s:
             notify_candidate_status(after, s)
+            notify_manager_status(after, s)
     return RedirectResponse(f"/admin/application/{i}",303) if r else PlainTextResponse("Ошибка обновления",500)
 
 @app.post("/admin/delete")
