@@ -25,6 +25,19 @@ LABELS = {
     "interview": "🎙 Интервью", "registration": "📝 Регистрация",
     "active": "🟢 Активна", "reject": "🔴 Отклонена",
 }
+
+REGISTRATION_MESSAGES = {
+    "ru": "<b>VESTHETIC</b>\n\nМы получили и рассмотрели твою анкету.\nСледующий шаг — регистрация на платформе <b>Stripchat</b>.\n\nНажми кнопку ниже, чтобы перейти к регистрации.\n\nЕсли возникнут вопросы или сложности — напиши нам.",
+    "en": "<b>VESTHETIC</b>\n\nWe have received and reviewed your application.\nThe next step is registration on <b>Stripchat</b>.\n\nTap the button below to continue with registration.\n\nIf you have any questions or run into any issues, message us.",
+    "sk": "<b>VESTHETIC</b>\n\nVašu žiadosť sme prijali a posúdili.\nĎalším krokom je registrácia na platforme <b>Stripchat</b>.\n\nPokračujte kliknutím na tlačidlo nižšie.\n\nAk máte otázky alebo problémy, napíšte nám.",
+    "ua": "<b>VESTHETIC</b>\n\nМи отримали та розглянули вашу заявку.\nНаступний крок — реєстрація на платформі <b>Stripchat</b>.\n\nНатисніть кнопку нижче, щоб перейти до реєстрації.\n\nЯкщо виникнуть питання або труднощі — напишіть нам."
+}
+REGISTRATION_BUTTONS = {
+    "ru": "🔗 Перейти к регистрации",
+    "en": "🔗 Continue to registration",
+    "sk": "🔗 Pokračovať v registrácii",
+    "ua": "🔗 Перейти до реєстрації"
+}
 TEXT = {
     "ru": {
         "welcome":"<b>VESTHETIC | Digital Talent Agency</b>\n\nVESTHETIC помогает совершеннолетним онлайн-креаторам развивать карьеру на международных платформах. Мы берём на себя организационную часть, коммуникацию и сопровождение, чтобы creator мог сосредоточиться на своей работе.\n\n<b>18+ only • Voluntary • Global</b>\n\nУчастие добровольное. Условия и формат сотрудничества обсуждаются индивидуально после рассмотрения заявки.",        "about":"<b>VESTHETIC</b>\n\nVESTHETIC — Digital Talent Agency для взрослых онлайн-креаторов, которые хотят работать системно и развиваться на международном рынке.\n\nМы помогаем с организацией рабочего процесса, коммуникацией и сопровождением. Конкретный формат работы зависит от платформ, задач и договорённостей с creator.\n\n<b>Модель сотрудничества:</b> 75% creator / 25% VESTHETIC.\n\nНаша цель — выстроить понятный и профессиональный процесс, в котором creator понимает условия, формат работы и дальнейшие шаги.",        "terms":"<b>Условия сотрудничества</b>\n\n<b>Возраст</b>\nК сотрудничеству допускаются только совершеннолетние — 18+.\n\n<b>Добровольность</b>\nУчастие добровольное. Вы сами принимаете решение о начале и продолжении сотрудничества.\n\n<b>Доход</b>\nБазовая модель распределения: 75% дохода получает creator, 25% — VESTHETIC. Конкретные условия могут обсуждаться до начала сотрудничества.\n\n<b>Формат работы</b>\nРабота может выполняться удалённо. График и рабочие условия согласовываются индивидуально.\n\n<b>Конфиденциальность</b>\nНе отправляйте документы, банковские данные, пароли или другие чувствительные данные через Telegram. Если такие данные понадобятся на официальном этапе оформления, менеджер отдельно объяснит безопасный порядок их передачи.",        "faq":"<b>FAQ</b>\n\n<b>Кто может подать заявку?</b>\nТолько совершеннолетние — 18+.\n\n<b>Нужен ли опыт?</b>\nНет. Опыт работы на подобных платформах не обязателен.\n\n<b>Где можно работать?</b>\nРаботать можно из дома или из другого удобного для вас места.\n\n<b>Какое оборудование нужно?</b>\nНа старте достаточно телефона или ПК. Дополнительное оборудование зависит от выбранного формата работы.\n\n<b>Какой график?</b>\nГрафик согласовывается индивидуально с учётом вашей доступности.\n\n<b>Как распределяется доход?</b>\n75% получает creator, 25% — VESTHETIC.\n\n<b>Есть ли обучение?</b>\nМенеджер расскажет о процессе и следующих шагах после рассмотрения заявки.\n\n<b>Как подать заявку?</b>\nНажмите «Подать заявку» в меню и заполните короткую анкету.\n\n<b>Что происходит после заявки?</b>\nЗаявку рассматривает менеджер VESTHETIC, после чего связывается с вами.\n\n<b>Безопасны ли мои данные?</b>\nНе отправляйте документы или банковские данные через Telegram.\n\nЕсли остались вопросы — свяжитесь с менеджером VESTHETIC.",        "apply":"<b>Заявка в VESTHETIC</b>\n\nЗаполнение анкеты займёт несколько минут. Нам нужна базовая информация о вас, вашем опыте и доступности, чтобы менеджер мог оценить подходящий формат сотрудничества.\n\nПеред началом подтвердите, что вам уже исполнилось 18 лет и участие добровольное.",        "age":"Вам уже исполнилось 18 лет?",
@@ -123,8 +136,10 @@ def user_save(chat,username,u):
         return updated
     return sb("POST","bot_users",payload)
 
-def manager_markup(i):
-    return {"inline_keyboard":[
+def manager_markup(i, app_data=None):
+    if app_data is None:
+        app_data = app_get(i)
+    rows = [
         [
             {"text":"🟢 Активна","callback_data":f"mgr_status_active_{i}"},
             {"text":"🟡 В работе","callback_data":f"mgr_status_progress_{i}"},
@@ -135,7 +150,11 @@ def manager_markup(i):
             {"text":"📝 Регистрация","callback_data":f"mgr_status_registration_{i}"},
             {"text":"🔴 Отклонить","callback_data":f"mgr_status_reject_{i}"}
         ]
-    ]}
+    ]
+    if app_data and app_data.get("status") == "registration":
+        label = "🔁 Отправить новую ссылку" if app_data.get("registration_url") else "🔗 Отправить ссылку модели"
+        rows.append([{"text":label,"callback_data":f"mgr_link_{i}"}])
+    return {"inline_keyboard":rows}
 
 def notify_candidate(app_data, action):
     chat=app_data.get("telegram_chat_id")
@@ -204,7 +223,9 @@ def notify_manager_status(app_data, status):
         f"<b>Телефон:</b> {esc(app_data.get('contact'))}\n"
         f"<b>Telegram:</b> {esc('@'+username if username else 'без @username')}"
     )
-    markup={"inline_keyboard":[[{"text":"💬 Открыть Telegram","url":f"tg://user?id={chat}"}]]} if chat else None
+    markup=manager_markup(i, app_data) if i else None
+    if chat and markup:
+        markup["inline_keyboard"].append([{"text":"💬 Открыть Telegram","url":f"tg://user?id={chat}"}])
     send(MANAGER_ID,msg,markup)
 
 def send_contact(chat,phone,first_name,last_name=""):
@@ -212,6 +233,30 @@ def send_contact(chat,phone,first_name,last_name=""):
     if last_name:
         d["last_name"]=last_name
     return tg("sendContact",d)
+
+def valid_registration_url(value):
+    try:
+        p=urllib.parse.urlparse(value.strip())
+        return p.scheme in ("http","https") and bool(p.netloc)
+    except Exception:
+        return False
+
+def send_registration_link(app_data, url):
+    chat=app_data.get("telegram_chat_id")
+    if not chat:
+        return False
+    user=user_get(chat, app_data.get("telegram_username"))
+    lang=user.get("lang") or "en"
+    markup={"inline_keyboard":[[{"text":REGISTRATION_BUTTONS.get(lang,REGISTRATION_BUTTONS["en"]),"url":url}]]}
+    result=send(chat,REGISTRATION_MESSAGES.get(lang,REGISTRATION_MESSAGES["en"]),markup)
+    if not result or not result.get("ok"):
+        return False
+    updated=sb("PATCH","applications",{
+        "registration_url":url,
+        "registration_sent_at":datetime.now(timezone.utc).isoformat(),
+        "registration_sent_by_telegram_id":MANAGER_ID
+    },{"id":f"eq.{app_data.get('id')}","select":"*"})
+    return bool(updated)
 
 def application_create(chat,username,d):
     rows=sb("POST","applications",{"telegram_chat_id":chat,"telegram_username":username,
@@ -290,6 +335,33 @@ def process_message(m):
         u={"lang":lang,"state":None,"application":{}}; user_save(chat,username,u)
         send(chat,"<b>VESTHETIC</b>",kb_lang()); return
     state=u.get("state")
+    if chat==MANAGER_ID and isinstance(state,str) and state.startswith("mgr_link_"):
+        raw_id=state[len("mgr_link_"):]
+        if not raw_id.isdigit():
+            u["state"]=None; user_save(chat,username,u)
+            send(chat,"❌ Некорректный номер заявки.")
+            return
+        i=int(raw_id)
+        a=app_get(i)
+        if not a:
+            u["state"]=None; user_save(chat,username,u)
+            send(chat,f"❌ Заявка #{i} не найдена.")
+            return
+        if a.get("status")!="registration":
+            u["state"]=None; user_save(chat,username,u)
+            send(chat,f"⚠️ Ссылка отправляется только для заявок со статусом 📝 Регистрация. Сейчас: {esc(LABELS.get(a.get('status'),a.get('status')))}")
+            return
+        if not valid_registration_url(text):
+            send(chat,"❌ Это не похоже на ссылку. Отправьте полный URL, начинающийся с http:// или https://.")
+            return
+        if not a.get("telegram_chat_id"):
+            u["state"]=None; user_save(chat,username,u)
+            send(chat,f"❌ У заявки #{i} нет Telegram ID кандидата.")
+            return
+        ok=send_registration_link(a,text)
+        u["state"]=None; user_save(chat,username,u)
+        send(chat,f"{'✅ Ссылка отправлена кандидату' if ok else '❌ Не удалось отправить ссылку'} по заявке #{i}.")
+        return
     if state=="apply_contact" and contact:
         owner_id=contact.get("user_id")
         if owner_id is not None and str(owner_id)!=str(chat):
@@ -352,6 +424,27 @@ def process_callback(c):
         edit(chat,mid,TEXT[lang]["apply"],{"inline_keyboard":[[{"text":"18+","callback_data":"age_yes"},{"text":"Under 18","callback_data":"age_no"}]]}); answer(cid); return
     if data=="age_no":
         u["state"]=None; user_save(chat,username,u); edit(chat,mid,TEXT[lang]["no"]); answer(cid); return
+    if data.startswith("mgr_link_"):
+        if chat!=MANAGER_ID:
+            answer(cid,"Нет доступа")
+            return
+        raw_id=data[len("mgr_link_"):]
+        if not raw_id.isdigit():
+            answer(cid,"Некорректная заявка")
+            return
+        i=int(raw_id)
+        a=app_get(i)
+        if not a:
+            answer(cid,"Заявка не найдена")
+            return
+        if a.get("status")!="registration":
+            answer(cid,"Сначала переведите заявку в «Регистрация»")
+            return
+        u["state"]=f"mgr_link_{i}"
+        user_save(chat,username,u)
+        answer(cid)
+        send(chat,f"🔗 <b>Отправка ссылки — заявка #{i}</b>\n\nОтправьте регистрационную ссылку одним сообщением.\nНапример: <code>https://stripchat.com/...</code>\n\nБот проверит URL и отправит готовое сообщение кандидату от имени VESTHETIC.")
+        return
     if data.startswith("mgr_status_"):
         parts=data.split("_")
         if len(parts)==4 and str(parts[3]).isdigit():
